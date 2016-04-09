@@ -2,8 +2,68 @@
 r.dbCreate('buckbuddy');
 
 # create tables
-r.db('buckbuddy').tableCreate('user', {primaryKey: 'userId'});
+r.db('buckbuddy').tableCreate('user', {primaryKey: 'email'});
 r.db('buckbuddy').tableCreate('campaign'), {primaryKey: 'campaignId'};
 r.db('buckbuddy').tableCreate('donation'), {primaryKey: 'transactionId'};
 
-
+# sample input
+## user
+{
+  "user": {
+    "user_id": "",
+    "created_at": "",
+    "last_updated_at": "",
+    "tokens": [
+      {
+        "token": "",
+        "expire_at": ""
+      }
+    ],
+    "first_name": "",
+    "middle_name": "",
+    "last_name": "",
+    "email": "", # primary key - due to lack of unique constraints in rethinkdb
+    "password": "",
+    "dob": "",
+    "country": "",
+    "currency": "",
+    "profile_pic": "",
+    "affiliate_profile": {
+      "affiliate_id": ""
+    },
+    "payment_profile": {
+      "partner": {
+        "name": "Stripe",
+        "account_details": {
+          "account_id": "",
+          "country": ""
+        }
+      }
+    },
+    "social_profiles": {
+      "facebook_profile": {
+        "user_access_token": "",
+        "app_access_token": "",
+        "page_access_token": "",
+        "client_token": "",
+        "first_name": "",
+        "last_name": "",
+        "email": ""
+      },
+      "twitter": {
+        "app_id": "",
+        "app_secret": "",
+        "access_token": "",
+        "first_name": "",
+        "last_name": "",
+        "email": ""
+      },
+      "whatsapp": {
+        "hash": ""
+      },
+      "sms": {
+        "hash": ""
+      }
+    }
+  }
+}
