@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.buckbuddy</groupId>
+	<artifactId>api</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0</version>
+	<name>BuckBuddy-API</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<rethink.driver.version>2.3.0</rethink.driver.version>
+		<jackson.core.version>2.7.3</jackson.core.version>
+		<jackson.annotations.version>2.7.3</jackson.annotations.version>
+		<jackson.databind.version>2.7.3</jackson.databind.version>
+		<spark.version>2.3</spark.version>
+		<slf4j-simple.version>1.7.21</slf4j-simple.version>
+	</properties>
+	<modules>
+		<module>admin</module>
+		<module>user</module>
+		<module>campaign</module>
+		<module>donation</module>
+	</modules>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>1.5</source>
+						<target>1.5</target>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.rethinkdb</groupId>
+			<artifactId>rethinkdb-driver</artifactId>
+			<version>${rethink.driver.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.annotations.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.databind.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sparkjava</groupId>
+			<artifactId>spark-core</artifactId>
+			<version>${spark.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${slf4j-simple.version}</version>
+		</dependency>
+	</dependencies>
+</project>
