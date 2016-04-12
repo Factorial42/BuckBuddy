@@ -13,8 +13,10 @@
 		<jackson.core.version>2.7.3</jackson.core.version>
 		<jackson.annotations.version>2.7.3</jackson.annotations.version>
 		<jackson.databind.version>2.7.3</jackson.databind.version>
+		<jackson.datatype.jsr310.version>2.7.3</jackson.datatype.jsr310.version>
 		<spark.version>2.3</spark.version>
 		<slf4j-simple.version>1.7.21</slf4j-simple.version>
+		<buckbuddy.core.version>1.0</buckbuddy.core.version>
 	</properties>
 	<modules>
 		<module>admin</module>
@@ -40,6 +42,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.buckbuddy</groupId>
+			<artifactId>core</artifactId>
+			<version>${buckbuddy.core.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.rethinkdb</groupId>
 			<artifactId>rethinkdb-driver</artifactId>
 			<version>${rethink.driver.version}</version>
@@ -49,15 +56,20 @@
 			<artifactId>jackson-core</artifactId>
 			<version>${jackson.core.version}</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>${jackson.annotations.version}</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 			<version>${jackson.databind.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>${jackson.datatype.jsr310.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sparkjava</groupId>

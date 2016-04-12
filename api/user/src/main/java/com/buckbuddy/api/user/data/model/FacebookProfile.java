@@ -9,6 +9,9 @@ package com.buckbuddy.api.user.data.model;
  */
 public class FacebookProfile {
 
+	private String name;
+	private String facebookID;
+	private String pic;
 	private String firstName;
 	private String middleName;
 	private String lastName;
@@ -31,6 +34,48 @@ public class FacebookProfile {
 
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the facebookID
+	 */
+	public String getFacebookID() {
+		return facebookID;
+	}
+
+	/**
+	 * @param facebookID the facebookID to set
+	 */
+	public void setFacebookID(String facebookID) {
+		this.facebookID = facebookID;
+	}
+
+	/**
+	 * @return the pic
+	 */
+	public String getPic() {
+		return pic;
+	}
+
+	/**
+	 * @param pic the pic to set
+	 */
+	public void setPic(String pic) {
+		this.pic = pic;
 	}
 
 	public String getMiddleName() {

@@ -3,6 +3,8 @@ package com.buckbuddy.api.user.data;
 public class UserDataException extends Exception {
 	
 	public final static String UNKNOWN = "unknown";	
+	public final static String SECURITY_EXCEPTION = "Security Exception";
+	public final static String DB_EXCEPTION = "Database Exception";
 	public final static String DATA_PARSE_ERROR = "error parsing response from db";
 
 	public UserDataException() {

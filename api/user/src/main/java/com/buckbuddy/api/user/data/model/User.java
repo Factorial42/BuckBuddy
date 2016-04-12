@@ -6,9 +6,11 @@ package com.buckbuddy.api.user.data.model;
 import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.Currency;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.github.scribejava.core.model.OAuth2AccessToken;
 
 /**
  * @author jtandalai
@@ -18,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class User {
 
 	private String userId;
+	private String token;
+	private Boolean authenticated;
 	private OffsetDateTime createdAt;
 	private OffsetDateTime lastUpdatedAt;
 	private String firstName;
@@ -28,10 +32,12 @@ public class User {
 	private String country;
 	private Currency currency;
 	private String currencyString;
+	private String s3handle;
 	private URL profilePic;
 	private AffilicateProfile affiliateProfile;
 	private PaymentProfile paymentProfiles;
 	private SocialProfiles socialProfiles;
+	private Boolean active;
 
 	/**
 	 * 
@@ -39,7 +45,7 @@ public class User {
 	public User() {
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	/**
 	 * @return the userId
 	 */
@@ -48,10 +54,41 @@ public class User {
 	}
 
 	/**
-	 * @param userId the userId to set
+	 * @param userId
+	 *            the userId to set
 	 */
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	/**
+	 * @return the token
+	 */
+	public String getToken() {
+		return token;
+	}
+
+	/**
+	 * @param token
+	 *            the token to set
+	 */
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	/**
+	 * @return the authenticated
+	 */
+	public Boolean getAuthenticated() {
+		return authenticated;
+	}
+
+	/**
+	 * @param authenticated
+	 *            the authenticated to set
+	 */
+	public void setAuthenticated(Boolean authenticated) {
+		this.authenticated = authenticated;
 	}
 
 	/**
@@ -62,7 +99,8 @@ public class User {
 	}
 
 	/**
-	 * @param offsetDateTime the createdAt to set
+	 * @param offsetDateTime
+	 *            the createdAt to set
 	 */
 	public void setCreatedAt(OffsetDateTime offsetDateTime) {
 		this.createdAt = offsetDateTime;
@@ -76,7 +114,8 @@ public class User {
 	}
 
 	/**
-	 * @param lastUpdatedAt the lastUpdatedAt to set
+	 * @param lastUpdatedAt
+	 *            the lastUpdatedAt to set
 	 */
 	public void setLastUpdatedAt(OffsetDateTime lastUpdatedAt) {
 		this.lastUpdatedAt = lastUpdatedAt;
@@ -90,7 +129,8 @@ public class User {
 	}
 
 	/**
-	 * @param firstName the firstName to set
+	 * @param firstName
+	 *            the firstName to set
 	 */
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
@@ -104,7 +144,8 @@ public class User {
 	}
 
 	/**
-	 * @param middleName the middleName to set
+	 * @param middleName
+	 *            the middleName to set
 	 */
 	public void setMiddleName(String middleName) {
 		this.middleName = middleName;
@@ -118,7 +159,8 @@ public class User {
 	}
 
 	/**
-	 * @param lastName the lastName to set
+	 * @param lastName
+	 *            the lastName to set
 	 */
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
@@ -132,7 +174,8 @@ public class User {
 	}
 
 	/**
-	 * @param email the email to set
+	 * @param email
+	 *            the email to set
 	 */
 	public void setEmail(String email) {
 		this.email = email;
@@ -146,7 +189,8 @@ public class User {
 	}
 
 	/**
-	 * @param password the password to set
+	 * @param password
+	 *            the password to set
 	 */
 	public void setPassword(String password) {
 		this.password = password;
@@ -160,7 +204,8 @@ public class User {
 	}
 
 	/**
-	 * @param country the country to set
+	 * @param country
+	 *            the country to set
 	 */
 	public void setCountry(String country) {
 		this.country = country;
@@ -174,7 +219,8 @@ public class User {
 	}
 
 	/**
-	 * @param currency the currency to set
+	 * @param currency
+	 *            the currency to set
 	 */
 	public void setCurrency(Currency currency) {
 		this.currency = currency;
@@ -188,10 +234,26 @@ public class User {
 	}
 
 	/**
-	 * @param currencyString the currencyString to set
+	 * @param currencyString
+	 *            the currencyString to set
 	 */
 	public void setCurrencyString(String currencyString) {
 		this.currencyString = currencyString;
+	}
+
+	/**
+	 * @return the s3handle
+	 */
+	public String getS3handle() {
+		return s3handle;
+	}
+
+	/**
+	 * @param s3handle
+	 *            the s3handle to set
+	 */
+	public void setS3handle(String s3handle) {
+		this.s3handle = s3handle;
 	}
 
 	/**
@@ -202,7 +264,8 @@ public class User {
 	}
 
 	/**
-	 * @param profilePic the profilePic to set
+	 * @param profilePic
+	 *            the profilePic to set
 	 */
 	public void setProfilePic(URL profilePic) {
 		this.profilePic = profilePic;
@@ -216,7 +279,8 @@ public class User {
 	}
 
 	/**
-	 * @param affiliateProfile the affiliateProfile to set
+	 * @param affiliateProfile
+	 *            the affiliateProfile to set
 	 */
 	public void setAffiliateProfile(AffilicateProfile affiliateProfile) {
 		this.affiliateProfile = affiliateProfile;
@@ -230,7 +294,8 @@ public class User {
 	}
 
 	/**
-	 * @param paymentProfiles the paymentProfiles to set
+	 * @param paymentProfiles
+	 *            the paymentProfiles to set
 	 */
 	public void setPaymentProfiles(PaymentProfile paymentProfiles) {
 		this.paymentProfiles = paymentProfiles;
@@ -244,14 +309,66 @@ public class User {
 	}
 
 	/**
-	 * @param socialProfiles the socialProfiles to set
+	 * @param socialProfiles
+	 *            the socialProfiles to set
 	 */
 	public void setSocialProfiles(SocialProfiles socialProfiles) {
 		this.socialProfiles = socialProfiles;
 	}
 
-	
-	/* (non-Javadoc)
+	/**
+	 * @return the active
+	 */
+	public Boolean getActive() {
+		return active;
+	}
+
+	/**
+	 * @param active
+	 *            the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	public static User obfuscate(User user) {
+		user.setPassword(null);
+		return user;
+	}
+
+	public static Map<String, Object> obfuscate(Map<String, Object> user) {
+		user.remove("password");
+		return user;
+	}
+
+	public static User createUserFromFBProfile(com.restfb.types.User fbUser,
+			OAuth2AccessToken accessToken) {
+		User user = new User();
+		String[] nameArray = null;
+		SocialProfiles socialProfile = new SocialProfiles();
+		FacebookProfile facebookProfile = new FacebookProfile();
+		facebookProfile.setName(fbUser.getName());
+		facebookProfile.setFacebookID(fbUser.getThirdPartyId());
+		facebookProfile.setPic(fbUser.getPicture().getUrl());
+		facebookProfile.setEmail(fbUser.getEmail());
+		facebookProfile.setUserAccessToken(accessToken.getAccessToken());
+		socialProfile.setFacebookProfile(facebookProfile);
+		user.setSocialProfiles(socialProfile);
+
+		nameArray = fbUser.getName().split(" ");
+		if (nameArray.length >= 2) {
+			user.setFirstName(nameArray[0]);
+			user.setMiddleName(nameArray[1]);
+			user.setLastName(nameArray[2]);
+		}
+		user.setEmail(user.getEmail());
+
+		return user;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -287,7 +404,9 @@ public class User {
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -403,7 +522,9 @@ public class User {
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
