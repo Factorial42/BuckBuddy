@@ -279,6 +279,7 @@ public class UserModelImpl implements UserModel {
 	@Override
 	public User getByEmail(String email) throws UserDataException,
 			BuckBuddyException {
+		// user id is email encrypted. so get by user id
 		return getById(SecurityUtil.encrypt(email, SecurityUtil.SHA_256),
 				Boolean.TRUE);
 	}
@@ -286,6 +287,7 @@ public class UserModelImpl implements UserModel {
 	@Override
 	public User getByEmail(String email, Boolean obfuscate)
 			throws UserDataException, BuckBuddyException {
+		// user id is email encrypted. so get by user id
 		return getById(SecurityUtil.encrypt(email, SecurityUtil.SHA_256),
 				obfuscate);
 	}

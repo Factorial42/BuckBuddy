@@ -105,7 +105,7 @@ public interface UserModel {
 	public User getById(String email, Boolean obfuscate)
 			throws UserDataException;
 
-	public Object createUserFromFBProfile(com.restfb.types.User user,
+	public User createUserFromFBProfile(com.restfb.types.User user,
 			OAuth2AccessToken accessToken);
 
 	public User getByFBId(String fbId) throws UserDataException;

@@ -1,40 +1,80 @@
 # BuckBuddy User Microservice REST API
 
+## General notes:
+Response structure will have "data"-holding user object for this service and "error"-holding any "message" specific to errors that occured in the backend elements.
+
 ## create regular user
 Req:
-curl -i -XPOST 'localhost:4567/users/signup' -d '{"firstName":"test", "lastName":"user", "email":"test@buckbuddy.com","password":"test"}'
+curl -i -XPOST 'localhost:4567/users/signup' -d '{"firstName":"test", "lastName":"user", "email":"test1@buckbuddy.com","password":"test"}'
 
-Res:
+Res: User object with token
 HTTP/1.1 201 Created
+Date: Wed, 13 Apr 2016 08:06:58 GMT
 Content-Type: application/json
-{"authenticated":true,"deleted":0,"inserted":1,"unchanged":0,"replaced":0,"errors":0,"skipped":0,"token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMzczMWQyYmQ2ZjJmY2YxMjllNGRmZmZmNDA1NTc5N2RiZTljYWNjYzI1NTc2ZjYyNTYxMjJiZjBhYzM0NTlmIn0.LMXpO016qEH54qi6RmNSi718BDwLGXwxt67QAYmWaYbyslmKW6SocbESWiczB1OZWNKwlqf1pkqBinRuejwWvg"}
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"data":{"userId":"ec67978322e5fbd7604e8db2ad0e89ab1fc4b7dee0a9a9655fb662b8ae647e71","token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA","createdAt":1460534818.875,"lastUpdatedAt":1460534818.875,"firstName":"test","lastName":"user","email":"test1@buckbuddy.com","s3handle":"d58415bbb7da062cb020a2965bb862f3","active":true},"error":null}
+
+## create regular user - error 
+Res:
+HTTP/1.1 401 Unauthorized
+Date: Wed, 13 Apr 2016 08:07:51 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"data":null,"error":{"message":"Duplicate primary key.."}}
 
 ## login regular user
 Req:
-curl -i -XPOST 'localhost:4567/users/login' -d '{"email":"test@buckbuddy.com", "password":"test"}'
+curl -i -XPOST 'localhost:4567/users/login' -d '{"email":"test1@buckbuddy.com", "password":"test"}'
 
-Res:
-{"userId":"a3731d2bd6f2fcf129e4dffff4055797dbe9caccc25576f6256122bf0ac3459f","token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMzczMWQyYmQ2ZjJmY2YxMjllNGRmZmZmNDA1NTc5N2RiZTljYWNjYzI1NTc2ZjYyNTYxMjJiZjBhYzM0NTlmIn0.rA6sL7-25vEOq4-NLe-0y5rlzzc_gSQLHxRDdA0vM4KnHfq5h29iFL_X6Cpf19HUb2aDo4xV-wTpKpwV8E_gew","authenticated":true,"createdAt":1460486525.930000000,"lastUpdatedAt":1460486526.562000000,"firstName":"test","lastName":"user","email":"test@buckbuddy.com","password":"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08","s3handle":"ef19581ea5f645288f1e27b5c412c6e5","active":true}J
+Res: User object with token
+HTTP/1.1 200 OK
+Date: Wed, 13 Apr 2016 08:09:22 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"data":{"userId":"ec67978322e5fbd7604e8db2ad0e89ab1fc4b7dee0a9a9655fb662b8ae647e71","token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA","createdAt":1460534818.875,"lastUpdatedAt":1460534818.875,"firstName":"test","lastName":"user","email":"test1@buckbuddy.com","s3handle":"d58415bbb7da062cb020a2965bb862f3","active":true},"error":null}
 
 ## fb get profile
 Req:
-curl -XGET 'localhost:4567/users/fb/profile?code=AQBtgqbivQlGBVF1zqDhktGgNCcwWnAhE5lC-hsoA9GuKSz0uwf19mikWivNuQIHOQRm9jFkXOa8HccOhgbKHa140xcP3OvjgMapTdCfs-JLya32neUJTf50q2N4WiSOb9NXKgNw97q58dnJZH4wlDqAH68qYtsvaoJa6V1_sJjp34MTqJ4PJmP3mG8UtX_jU36teNn7ol-qZK3pvh7CMq3jDUrM0Jn6Z4qKHH3o63NQwloFR-5CxsTsJQQ_dT-VJrlWkLsgaTuAaNJFhxb8gkLITtXiUx_UY03wzg4VOqNtMXH1DqGgzUSZPWI4P3FwuiOB5v65nocb8-yMuu05Gpu4noY5GW-N2VyjSzUbDcsvzQ'
+curl -i -XGET 'localhost:4567/users/fb/profile?code=AQBVwziF2tuwnvRu0J9ypm0ld70o0sAjpJUUwhcNCBW_Gq6tNpeh9iQ9on8XSVlgmbkx0BfEuXHs2qC3v6v8mx7SQcYTGRSIAJfvTnOD4iYGjxe7xaqALudRrQzITD_yDVfstskrpm_oyfYFvRttEqGkZIDPp56MoD7Rfge2CPCZInJlRdYup-aNqTs3P40w4zsm_RZKVWdVVoMJnI0KBS1j7Wy4Il2CjQEGVXtpktbaCaECHBiePDab889gliyw3Dq87WzlUNteCFcG_WPeEkUCHx9TTSFwFdTf28Io7t2elmzx_A6t_f_bUHFuzoyOST5oMUA0G51e0P6xOxiO022yrvOSU2sTqc13ZRLXgrXJFQ'
 
-Res:
-{"firstName":"Bucky","middleName":"One","lastName":"Tester","socialProfiles":{"facebookProfile":{"name":"Bucky One Tester","facebookID":"gT8evSo8fJiiZEeEjhnfaIQdyE4","pic":"https://scontent.xx.fbcdn.net/hprofile-xfa1/v/t1.0-1/c15.0.50.50/p50x50/10354686_10150004552801856_220367501106153455_n.jpg?oh=de3cf921c79d63ac0e908353690899f6&oe=5785D22F","firstName":null,"middleName":null,"lastName":null,"email":"bucky_ykqhoax_tester@tfbnw.net","userAccessToken":"CAAVwXiHXUp0BAIPgNJhjEnjUi1jKx69I8evPpctF9a1VxhD1bEi5IZCjqfgDZCkZBmrPa1d78VW3w9l8RSvqXCQtcDQT49sVfWZCRT68ZC3LgpZBlZAVaBlZAxpgAg6Hu6lWNWuVN7dr4bWtxvTFELVeHXkPd036whElq5m3iXoVoCDP8ENoqIF0X0imLrpYuecZD","appAccessToken":null,"pageAccessToken":null,"clientToken":null},"twitterProfile":null,"whatsappProfile":null,"smsProfile":null}}
+Res: User object with token, facebook profile info
+TTP/1.1 200 OK
+Date: Wed, 13 Apr 2016 08:23:37 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"data":{"firstName":"Bucky","middleName":"One","lastName":"Tester","socialProfiles":{"facebookProfile":{"name":"Bucky One Tester","facebookID":"gT8evSo8fJiiZEeEjhnfaIQdyE4","pic":"https://scontent.xx.fbcdn.net/v/t1.0-1/c15.0.50.50/p50x50/10354686_10150004552801856_220367501106153455_n.jpg?oh=de3cf921c79d63ac0e908353690899f6&oe=5785D22F","firstName":null,"middleName":null,"lastName":null,"email":"bucky_ykqhoax_tester@tfbnw.net","userAccessToken":"CAAVwXiHXUp0BAECd2oDJ4z4qEs1Ci2fF3y2ZBvIuECSeUG6WfoSFpuVubaZA9ZC6kcJUZBW5leNSHvZC1fCfK6ZAVxlgQGElQn6ZAnjZB5SlGace7iRK9xZAw9ozseZA4wY4h607LXWZBF65dDHmhll68eKUVOuzu1aatLmI1ybGlX6sqZC5clb2tqydmFyulhZCPbskZD","appAccessToken":null,"pageAccessToken":null,"clientToken":null},"twitterProfile":null,"whatsappProfile":null,"smsProfile":null}},"error":null}
 
 ## fb signup
 Req:
 curl -i -XPOST 'localhost:4567/users/fb/signup' -d '{"email":"bucky_ykqhoax_tester@tfbnw.net", "firstName":"Bucky","middleName":"One","lastName":"Tester","socialProfiles":{"facebookProfile":{"name":"Bucky One Tester","facebookID":"gT8evSo8fJiiZEeEjhnfaIQdyE4","pic":"https://scontent.xx.fbcdn.net/hprofile-xfa1/v/t1.0-1/c15.0.50.50/p50x50/10354686_10150004552801856_220367501106153455_n.jpg?oh=de3cf921c79d63ac0e908353690899f6&oe=5785D22F","firstName":null,"middleName":null,"lastName":null,"email":null,"userAccessToken":"CAAVwXiHXUp0BAAygkvbrZBT4E91TOkcYsZA3VCtFemqkGVfMHxKdMjh7zwe0mFwuZBgPf48MoAIUVlHvmJXXa13Gg6yZA8CoABo7pWxIW49vZATKG1ZAW7DSd9ayZB7yKfoqhw9Bxwm0JDUMhowwI6e9tN4jmEwOfsKAJp0m2Lejm0ZAxtLjExIvdgZBFBTc9YZAQZD","appAccessToken":null,"pageAccessToken":null,"clientToken":null, "email":"bucky_ykqhoax_tester@tfbnw.net"},"twitterProfile":null,"whatsappProfile":null,"smsProfile":null}}'
 
-Res:
+Res: User object with token, facebook profile
 HTTP/1.1 201 Created
+Date: Wed, 13 Apr 2016 08:26:18 GMT
 Content-Type: application/json
-{"authenticated":true,"deleted":0,"inserted":1,"unchanged":0,"replaced":0,"errors":0,"skipped":0,"token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3ODIxNTk3MDhlOWJiM2UzYWY1YzliZGYxZmY3N2Y3MDgyMzQxOGQxNjk3MGViODJmZTRkN2UxY2E1Y2E2OWFjIn0.mKQeq7mNQodV-ZV1Epg5gPihPN8EAygEAGvmGPHhg68tlxkwo6gQN7jLXQVNH7tSwnDdy-E6LbFxz08Z7fOayg"}
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"data":{"userId":"782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac","token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3ODIxNTk3MDhlOWJiM2UzYWY1YzliZGYxZmY3N2Y3MDgyMzQxOGQxNjk3MGViODJmZTRkN2UxY2E1Y2E2OWFjIn0.mKQeq7mNQodV-ZV1Epg5gPihPN8EAygEAGvmGPHhg68tlxkwo6gQN7jLXQVNH7tSwnDdy-E6LbFxz08Z7fOayg","createdAt":1460535981.233,"lastUpdatedAt":1460535981.233,"firstName":"Bucky","middleName":"One","lastName":"Tester","email":"bucky_ykqhoax_tester@tfbnw.net","s3handle":"7d913c52511e1ad37d82acb1573b5b39","socialProfiles":{"facebookProfile":{"name":"Bucky One Tester","facebookID":"gT8evSo8fJiiZEeEjhnfaIQdyE4","pic":"https://scontent.xx.fbcdn.net/hprofile-xfa1/v/t1.0-1/c15.0.50.50/p50x50/10354686_10150004552801856_220367501106153455_n.jpg?oh=de3cf921c79d63ac0e908353690899f6&oe=5785D22F","firstName":null,"middleName":null,"lastName":null,"email":"bucky_ykqhoax_tester@tfbnw.net","userAccessToken":"CAAVwXiHXUp0BAAygkvbrZBT4E91TOkcYsZA3VCtFemqkGVfMHxKdMjh7zwe0mFwuZBgPf48MoAIUVlHvmJXXa13Gg6yZA8CoABo7pWxIW49vZATKG1ZAW7DSd9ayZB7yKfoqhw9Bxwm0JDUMhowwI6e9tN4jmEwOfsKAJp0m2Lejm0ZAxtLjExIvdgZBFBTc9YZAQZD","appAccessToken":null,"pageAccessToken":null,"clientToken":null},"twitterProfile":null,"whatsappProfile":null,"smsProfile":null},"active":true},"error":null}
 
 ## fb login
 Req:
 curl -i -XPOST 'localhost:4567/users/fb/login?code=AQCMvR6DltrmRi_s0Y1pOn4IziTTdy-_Ani5r8fmxtFBJLHrDllLhK5SExESgi9DQEIZOpaHifatI5vq0UiyyMtdeNMWGPtAbAbQ3CC6TLm0v05D9JWF4cK8r8Hm2_Wta5x_PrSPHiFNRltUCIvn9_-xO4DcaDl5NwIcxtkF24bX3-A0qkGlFRIotcILp6vouhp5ydw6VWmdnD2yl43GZVfhNhXRwnfgv8b1owp8M39Z1a4TTsqWJ7YbG0wP0Jpw2YvEyTijsZA1qXZs3IsPC7CKnLmRStvKLDcEKnCSH7Om899kh_lpgFbbw9yIOhdckaE55BruDqxM9726vnlFDQFcjjM8SsYabzjdFOly-uCFOA'
 
-Res:
-{"userId":"782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac","token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3ODIxNTk3MDhlOWJiM2UzYWY1YzliZGYxZmY3N2Y3MDgyMzQxOGQxNjk3MGViODJmZTRkN2UxY2E1Y2E2OWFjIn0.mKQeq7mNQodV-ZV1Epg5gPihPN8EAygEAGvmGPHhg68tlxkwo6gQN7jLXQVNH7tSwnDdy-E6LbFxz08Z7fOayg","authenticated":true,"createdAt":1460499042.676000000,"lastUpdatedAt":1460499043.242000000,"firstName":"Bucky","middleName":"One","lastName":"Tester","email":"bucky_ykqhoax_tester@tfbnw.net","s3handle":"7d913c52511e1ad37d82acb1573b5b39","socialProfiles":{"facebookProfile":{"name":"Bucky One Tester","facebookID":"gT8evSo8fJiiZEeEjhnfaIQdyE4","pic":"https://scontent.xx.fbcdn.net/hprofile-xfa1/v/t1.0-1/c15.0.50.50/p50x50/10354686_10150004552801856_220367501106153455_n.jpg?oh=de3cf921c79d63ac0e908353690899f6&oe=5785D22F","firstName":null,"middleName":null,"lastName":null,"email":"bucky_ykqhoax_tester@tfbnw.net","userAccessToken":"CAAVwXiHXUp0BAAygkvbrZBT4E91TOkcYsZA3VCtFemqkGVfMHxKdMjh7zwe0mFwuZBgPf48MoAIUVlHvmJXXa13Gg6yZA8CoABo7pWxIW49vZATKG1ZAW7DSd9ayZB7yKfoqhw9Bxwm0JDUMhowwI6e9tN4jmEwOfsKAJp0m2Lejm0ZAxtLjExIvdgZBFBTc9YZAQZD","appAccessToken":null,"pageAccessToken":null,"clientToken":null},"twitterProfile":null,"whatsappProfile":null,"smsProfile":null},"active":true}
+Res: User object with token, facebook profile
+HTTP/1.1 200 OK
+Date: Wed, 13 Apr 2016 08:27:59 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"data":{"userId":"782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac","token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3ODIxNTk3MDhlOWJiM2UzYWY1YzliZGYxZmY3N2Y3MDgyMzQxOGQxNjk3MGViODJmZTRkN2UxY2E1Y2E2OWFjIn0.mKQeq7mNQodV-ZV1Epg5gPihPN8EAygEAGvmGPHhg68tlxkwo6gQN7jLXQVNH7tSwnDdy-E6LbFxz08Z7fOayg","authenticated":true,"createdAt":1460535981.233,"lastUpdatedAt":1460535981.233,"firstName":"Bucky","middleName":"One","lastName":"Tester","email":"bucky_ykqhoax_tester@tfbnw.net","s3handle":"7d913c52511e1ad37d82acb1573b5b39","socialProfiles":{"facebookProfile":{"name":"Bucky One Tester","facebookID":"gT8evSo8fJiiZEeEjhnfaIQdyE4","pic":"https://scontent.xx.fbcdn.net/hprofile-xfa1/v/t1.0-1/c15.0.50.50/p50x50/10354686_10150004552801856_220367501106153455_n.jpg?oh=de3cf921c79d63ac0e908353690899f6&oe=5785D22F","firstName":null,"middleName":null,"lastName":null,"email":"bucky_ykqhoax_tester@tfbnw.net","userAccessToken":"CAAVwXiHXUp0BAAygkvbrZBT4E91TOkcYsZA3VCtFemqkGVfMHxKdMjh7zwe0mFwuZBgPf48MoAIUVlHvmJXXa13Gg6yZA8CoABo7pWxIW49vZATKG1ZAW7DSd9ayZB7yKfoqhw9Bxwm0JDUMhowwI6e9tN4jmEwOfsKAJp0m2Lejm0ZAxtLjExIvdgZBFBTc9YZAQZD","appAccessToken":null,"pageAccessToken":null,"clientToken":null},"twitterProfile":null,"whatsappProfile":null,"smsProfile":null},"active":true},"error":null}
+

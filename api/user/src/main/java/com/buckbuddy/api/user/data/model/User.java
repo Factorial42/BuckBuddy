@@ -178,7 +178,7 @@ public class User {
 	 *            the email to set
 	 */
 	public void setEmail(String email) {
-		this.email = email;
+		this.email = email!=null?email.trim():email;
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class User {
 	 *            the password to set
 	 */
 	public void setPassword(String password) {
-		this.password = password;
+		this.password = password!=null?password.trim():password;
 	}
 
 	/**

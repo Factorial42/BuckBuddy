@@ -16,14 +16,18 @@ import com.buckbuddy.api.user.data.UserDataException;
 import com.buckbuddy.api.user.data.UserModel;
 import com.buckbuddy.api.user.data.UserModelImpl;
 import com.buckbuddy.api.user.data.model.User;
+import com.buckbuddy.core.BuckBuddyResponse;
 import com.buckbuddy.core.exceptions.BuckBuddyException;
 import com.buckbuddy.core.security.JJWTUtil;
 import com.buckbuddy.core.security.SecurityUtil;
 import com.buckbuddy.core.social.FBUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.scribejava.core.model.OAuth2AccessToken;
+
+
 
 // TODO: Auto-generated Javadoc
 /**
@@ -199,49 +203,68 @@ public class UserRouter {
 
 	private void initializeLoginRoutes() {
 		post("/users/signup", (req, res) -> {
-
+			BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 			try {
 				String token = null;
 				User user = mapper.readValue(req.body(), User.class);
+
+				// check for email and password - mandatory fields
+				if (user.getEmail() == null || user.getEmail().isEmpty()
+						|| user.getPassword() == null
+						|| user.getPassword().isEmpty()) {
+					res.status(400);
+					buckbuddyResponse.setError(mapper.createObjectNode().put(
+							"message", "Email & Password are mandatory"));
+					res.type("application/json");
+					return mapper.writeValueAsString(buckbuddyResponse);
+				} 
 				Map<String, Object> response = userModelImpl.create(user);
 				if (response != null
 						&& response.get("inserted") instanceof Long
 						&& ((Long) response.get("inserted")) > 0) {
-					res.status(201);
 
+					// success flow
+					res.status(201);
 					// generate token
-				token = JJWTUtil.issueToken(user.getUserId());
-				response.put("authenticated", Boolean.TRUE);
-				response.put("token", token);
-			} else if (response != null
-					&& response.get("errors") instanceof Long
-					&& ((Long) response.get("errors")) > 0) {
-				if (((String) response.get("first_error"))
-						.startsWith("Duplicate primary key")) {
-					res.status(403);
+					User userFromDB = userModelImpl.getByEmail(user.getEmail());
+					token = JJWTUtil.issueToken(userFromDB.getUserId());
+					userFromDB.setToken(token);
+					buckbuddyResponse.setData(mapper.convertValue(userFromDB,
+							ObjectNode.class));
+					res.type("application/json");
+					return mapper.writeValueAsString(buckbuddyResponse);
+				} else if (response != null
+						&& response.get("errors") instanceof Long
+						&& ((Long) response.get("errors")) > 0) {
+	
+					// failure flow
+					res.status(401);
+					buckbuddyResponse.setError(mapper.createObjectNode().put(
+							"message", (String) response.get("first_error")));
+					res.type("application/json");
+					return mapper.writeValueAsString(buckbuddyResponse);
 				} else {
+					// failure flow
 					res.status(500);
-				}
-			} else {
-				res.status(200);
-				// generate token
-				token = JJWTUtil.issueToken(user.getUserId());
-				response.put("authenticated", Boolean.TRUE);
-				response.put("token", token);
+					buckbuddyResponse.setError(mapper.createObjectNode().put(
+							"message", BuckBuddyException.UNKNOWN));
+					res.type("application/json");
+					return mapper.writeValueAsString(buckbuddyResponse);
+				}				
+			} catch (UserDataException ude) {
+				res.status(500);
+				res.type("application/json");
+				buckbuddyResponse.setError(mapper
+						.createObjectNode().put("message",
+								BuckBuddyException.UNKNOWN));
+				return mapper.writeValueAsString(buckbuddyResponse);
 			}
-			res.type("application/json");
-			return mapper.writeValueAsString(response);
-		} catch (UserDataException ude) {
-			res.status(500);
-			res.type("application/json");
-			return mapper.createObjectNode().put("error",
-					UserDataException.UNKNOWN);
-		}
-	}	);
+		});
 
 		// regular user login
 		post("/users/login",
 				(req, res) -> {
+					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					User user = mapper.readValue(req.body(), User.class);
 
 					try {
@@ -249,73 +272,70 @@ public class UserRouter {
 						User userFromDB = userModelImpl.getByEmail(
 								user.getEmail(), Boolean.FALSE);
 
-						// check if there the user record
+						// check if there is user record
 						if (userFromDB == null
 								|| userFromDB.getUserId() == null) {
 							// log the issue and fail
 							LOG.debug("User not found");
-							user.setAuthenticated(Boolean.FALSE);
 							res.status(404);
 							res.type("application/json");
-						}
-
-						// check if password matches
-						if (userFromDB.getPassword() != null
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"User not found"));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						} else if (userFromDB.getPassword() != null
 								&& !userFromDB.getPassword().equals(
 										SecurityUtil.encrypt(
 												user.getPassword(),
 												SecurityUtil.SHA_256))) {
-							// log the issue and fail
+							// if passwords do not match, log the issue and fail
 							LOG.debug("Passwords do not match");
-							user.setAuthenticated(Boolean.FALSE);
 							res.status(401);
 							res.type("application/json");
-						}
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"Passwords do not match"));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						} 
 
 						// else generate token
 						String token = JJWTUtil.issueToken(userFromDB
 								.getUserId());
 						if (token != null && !token.isEmpty()) {
 							userFromDB.setToken(token);
-							userFromDB.setAuthenticated(Boolean.TRUE);
 							res.status(200);
 							res.type("application/json");
-							return mapper.writeValueAsString(userFromDB);
+
+							buckbuddyResponse.setData(mapper.convertValue(
+									User.obfuscate(userFromDB),
+									ObjectNode.class));
+							return mapper.writeValueAsString(buckbuddyResponse);
 						} else {
 							// log the issue and fail
 							LOG.debug("JJWTUtil.issueToken did not provide valid token:"
 									+ token);
-							user.setAuthenticated(Boolean.FALSE);
-							res.status(401);
+							res.status(500);
 							res.type("application/json");
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											BuckBuddyException.UNKNOWN));
+							return mapper.writeValueAsString(buckbuddyResponse);
 						}
+						
 					} catch (BuckBuddyException e) {
-						user.setAuthenticated(Boolean.FALSE);
-						res.status(401);
+						res.status(500);
 						res.type("application/json");
+						buckbuddyResponse.setError(mapper
+								.createObjectNode().put("message",
+										BuckBuddyException.UNKNOWN));
+						return mapper.writeValueAsString(buckbuddyResponse);
 					}
-					return user;
 				});
 
 		// user authenticate
-		post("/users/authenticate",
-				(req, res) -> {
-					User user = mapper.readValue(req.body(), User.class);
-
-					// generate token
-					String token = user.getToken();
-					boolean authenticated = JJWTUtil.authenticate(
-							user.getUserId(), user.getToken());
-					if (authenticated) {
-						user = userModelImpl.getById(user.getUserId());
-						user.setToken(token);
-						user.setAuthenticated(authenticated);
-					}
-
-					res.status(200);
-					res.type("application/json");
-					return user;
-				});
+		post("/users/authenticate", (req, res) -> {
+			return null;
+		});
 
 		// reset password
 		post("/users/resetPassword", (req, res) -> {
@@ -323,59 +343,100 @@ public class UserRouter {
 		});
 
 		// get fb user profile
-		get("/users/fb/profile", (req, res) -> {
-			String code = req.queryParams("code");
-			OAuth2AccessToken accessToken = FBUtil.extendToken(code);
-			com.restfb.types.User user = FBUtil.getProfile(accessToken);
-			res.status(200);
-			res.type("application/json");
-			return mapper.writeValueAsString(userModelImpl
-					.createUserFromFBProfile(user, accessToken));
-		});
+		get("/users/fb/profile",
+				(req, res) -> {
+					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+					String code = req.queryParams("code");
+					OAuth2AccessToken accessToken = FBUtil.extendToken(code);
+					com.restfb.types.User fbUser = FBUtil
+							.getProfile(accessToken);
+					res.type("application/json");
+					User user = userModelImpl.createUserFromFBProfile(fbUser,
+							accessToken);
+					if (user != null
+							&& user.getSocialProfiles() != null
+							&& user.getSocialProfiles().getFacebookProfile() != null
+							&& user.getSocialProfiles().getFacebookProfile()
+									.getFacebookID() != null) {
+						res.status(200);
+						res.type("application/json");
+						buckbuddyResponse.setData(mapper.convertValue(user,
+								ObjectNode.class));			
+						return mapper.writeValueAsString(buckbuddyResponse);			
+					} else {
+						res.status(500);
+						res.type("application/json");
+						buckbuddyResponse.setError(mapper
+								.createObjectNode().put("message",
+										BuckBuddyException.UNKNOWN));
+						return mapper.writeValueAsString(buckbuddyResponse);
+					}
+				});
 
-		post("/users/fb/signup", (req, res) -> {
+		post("/users/fb/signup",
+				(req, res) -> {
 
-			try {
-				String token = null;
-				User user = mapper.readValue(req.body(), User.class);
-				Map<String, Object> response = userModelImpl.create(user, Boolean.FALSE);
-				if (response != null
-						&& response.get("inserted") instanceof Long
-						&& ((Long) response.get("inserted")) > 0) {
-					res.status(201);
+					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+					try {
+						String token = null;
+						User user = mapper.readValue(req.body(), User.class);
 
-					// generate token
-				token = JJWTUtil.issueToken(user.getUserId());
-				response.put("authenticated", Boolean.TRUE);
-				response.put("token", token);
-			} else if (response != null
-					&& response.get("errors") instanceof Long
-					&& ((Long) response.get("errors")) > 0) {
-				if (((String) response.get("first_error"))
-						.startsWith("Duplicate primary key")) {
-					res.status(403);
-				} else {
-					res.status(500);
-				}
-			} else {
-				res.status(200);
-				// generate token
-				token = JJWTUtil.issueToken(user.getUserId());
-				response.put("authenticated", Boolean.TRUE);
-				response.put("token", token);
-			}
-			res.type("application/json");
-			return mapper.writeValueAsString(response);
-		} catch (UserDataException ude) {
-			res.status(500);
-			res.type("application/json");
-			return mapper.createObjectNode().put("error",
-					UserDataException.UNKNOWN);
-		}
-	}	);
+						// check for email and password - mandatory fields
+						if (user.getEmail() == null || user.getEmail().isEmpty()) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper.createObjectNode().put(
+									"message", "Email is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						} 
+						Map<String, Object> response = userModelImpl
+								.create(user, Boolean.FALSE);
+						if (response != null
+								&& response.get("inserted") instanceof Long
+								&& ((Long) response.get("inserted")) > 0) {
+
+							// success flow
+							res.status(201);
+							// generate token
+							User userFromDB = userModelImpl.getByEmail(user.getEmail());
+							token = JJWTUtil.issueToken(userFromDB.getUserId());
+							userFromDB.setToken(token);
+							buckbuddyResponse.setData(mapper.convertValue(userFromDB,
+									ObjectNode.class));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						} else if (response != null
+								&& response.get("errors") instanceof Long
+								&& ((Long) response.get("errors")) > 0) {
+			
+							// failure flow
+							res.status(401);
+							buckbuddyResponse.setError(mapper.createObjectNode().put(
+									"message", (String) response.get("first_error")));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						} else {
+							// failure flow
+							res.status(500);
+							buckbuddyResponse.setError(mapper.createObjectNode().put(
+									"message", BuckBuddyException.UNKNOWN));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						buckbuddyResponse.setError(mapper
+								.createObjectNode().put("message",
+										BuckBuddyException.UNKNOWN));
+						return mapper.writeValueAsString(buckbuddyResponse);
+					}
+				});
 		// fb user login
 		post("/users/fb/login",
 				(req, res) -> {
+					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					String code = req.queryParams("code");
 					OAuth2AccessToken accessToken = FBUtil.extendToken(code);
 					com.restfb.types.User fbUser = FBUtil
@@ -391,10 +452,11 @@ public class UserRouter {
 							LOG.debug("User not found");
 							res.status(404);
 							res.type("application/json");
-							User user = new User();
-							user.setAuthenticated(Boolean.FALSE);
-							return mapper.writeValueAsString(user);
-						}
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"User not found"));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						} 
 
 						// else generate token
 						String token = JJWTUtil.issueToken(userFromDB
@@ -404,23 +466,29 @@ public class UserRouter {
 							userFromDB.setAuthenticated(Boolean.TRUE);
 							res.status(200);
 							res.type("application/json");
-							return mapper.writeValueAsString(userFromDB);
+
+							buckbuddyResponse.setData(mapper.convertValue(
+									User.obfuscate(userFromDB),
+									ObjectNode.class));
+							return mapper.writeValueAsString(buckbuddyResponse);
 						} else {
 							// log the issue and fail
 							LOG.debug("JJWTUtil.issueToken did not provide valid token:"
 									+ token);
-							res.status(401);
+							res.status(500);
 							res.type("application/json");
-							User user = new User();
-							user.setAuthenticated(Boolean.FALSE);
-							return mapper.writeValueAsString(user);
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											BuckBuddyException.UNKNOWN));
+							return mapper.writeValueAsString(buckbuddyResponse);
 						}
 					} catch (BuckBuddyException e) {
-						res.status(401);
+						res.status(500);
 						res.type("application/json");
-						User user = new User();
-						user.setAuthenticated(Boolean.FALSE);
-						return user;
+						buckbuddyResponse.setError(mapper
+								.createObjectNode().put("message",
+										BuckBuddyException.UNKNOWN));
+						return mapper.writeValueAsString(buckbuddyResponse);
 					}
 				});
 	}
