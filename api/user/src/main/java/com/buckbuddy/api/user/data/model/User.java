@@ -24,6 +24,7 @@ public class User {
 	private Boolean authenticated;
 	private OffsetDateTime createdAt;
 	private OffsetDateTime lastUpdatedAt;
+	private String name;
 	private String firstName;
 	private String middleName;
 	private String lastName;
@@ -119,6 +120,31 @@ public class User {
 	 */
 	public void setLastUpdatedAt(OffsetDateTime lastUpdatedAt) {
 		this.lastUpdatedAt = lastUpdatedAt;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		String[] nameArray = null;
+		this.name = name;
+		nameArray = name!=null?name.split(" "):new String[]{};
+		if (nameArray.length >= 2) {
+			this.setFirstName(nameArray[0]);
+			this.setMiddleName(nameArray[1]);
+			this.setLastName(nameArray[2]);
+		}
+		if (nameArray.length == 2) {
+			this.setFirstName(nameArray[0]);
+			this.setLastName(nameArray[1]);
+		}
 	}
 
 	/**
@@ -344,7 +370,6 @@ public class User {
 	public static User createUserFromFBProfile(com.restfb.types.User fbUser,
 			OAuth2AccessToken accessToken) {
 		User user = new User();
-		String[] nameArray = null;
 		SocialProfiles socialProfile = new SocialProfiles();
 		FacebookProfile facebookProfile = new FacebookProfile();
 		facebookProfile.setName(fbUser.getName());
@@ -354,18 +379,13 @@ public class User {
 		facebookProfile.setUserAccessToken(accessToken.getAccessToken());
 		socialProfile.setFacebookProfile(facebookProfile);
 		user.setSocialProfiles(socialProfile);
-
-		nameArray = fbUser.getName().split(" ");
-		if (nameArray.length >= 2) {
-			user.setFirstName(nameArray[0]);
-			user.setMiddleName(nameArray[1]);
-			user.setLastName(nameArray[2]);
-		}
+		user.setName(fbUser.getName());
+		
 		user.setEmail(user.getEmail());
 
 		return user;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

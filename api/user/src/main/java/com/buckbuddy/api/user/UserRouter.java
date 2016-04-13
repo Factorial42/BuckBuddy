@@ -29,6 +29,8 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 
 
 
+
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class UserRouter.
@@ -346,8 +348,8 @@ public class UserRouter {
 		get("/users/fb/profile",
 				(req, res) -> {
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
-					String code = req.queryParams("code");
-					OAuth2AccessToken accessToken = FBUtil.extendToken(code);
+					String fbToken = req.queryParams("fbToken");
+					OAuth2AccessToken accessToken = FBUtil.extendToken(fbToken);
 					com.restfb.types.User fbUser = FBUtil
 							.getProfile(accessToken);
 					res.type("application/json");
@@ -378,29 +380,39 @@ public class UserRouter {
 
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					try {
-						String token = null;
-						User user = mapper.readValue(req.body(), User.class);
+						Map<String, Object> usermap = mapper.readValue(req.body(), Map.class);
 
-						// check for email and password - mandatory fields
-						if (user.getEmail() == null || user.getEmail().isEmpty()) {
+						// check for email and token - mandatory fields
+						if (usermap.get("name") == null || ((String)usermap.get("name")).isEmpty()
+								|| usermap.get("email") == null || ((String)usermap.get("email")).isEmpty() 
+								|| usermap.get("fbToken") == null || ((String)usermap.get("fbToken")).isEmpty()) {
 							res.status(400);
 							buckbuddyResponse.setError(mapper.createObjectNode().put(
-									"message", "Email is mandatory"));
+									"message", "Name, Email & Token are mandatory"));
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
 						} 
+						
+						OAuth2AccessToken accessToken = FBUtil.extendToken(((String)usermap.get("fbToken")));
+						com.restfb.types.User fbUser = FBUtil
+								.getProfile(accessToken);
+						res.type("application/json");
+						User user = userModelImpl.createUserFromFBProfile(fbUser,
+								accessToken);
+						user.setName(((String)usermap.get("name")));
+						user.setEmail(((String)usermap.get("email")));
+						
 						Map<String, Object> response = userModelImpl
 								.create(user, Boolean.FALSE);
 						if (response != null
 								&& response.get("inserted") instanceof Long
 								&& ((Long) response.get("inserted")) > 0) {
-
 							// success flow
 							res.status(201);
 							// generate token
 							User userFromDB = userModelImpl.getByEmail(user.getEmail());
-							token = JJWTUtil.issueToken(userFromDB.getUserId());
-							userFromDB.setToken(token);
+							String loginToken = JJWTUtil.issueToken(userFromDB.getUserId());
+							userFromDB.setToken(loginToken);
 							buckbuddyResponse.setData(mapper.convertValue(userFromDB,
 									ObjectNode.class));
 							res.type("application/json");
@@ -437,8 +449,8 @@ public class UserRouter {
 		post("/users/fb/login",
 				(req, res) -> {
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
-					String code = req.queryParams("code");
-					OAuth2AccessToken accessToken = FBUtil.extendToken(code);
+					String fbToken = req.queryParams("fbToken");
+					OAuth2AccessToken accessToken = FBUtil.extendToken(fbToken);
 					com.restfb.types.User fbUser = FBUtil
 							.getProfile(accessToken);
 

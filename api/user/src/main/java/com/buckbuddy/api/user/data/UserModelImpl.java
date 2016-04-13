@@ -29,6 +29,8 @@ public class UserModelImpl implements UserModel {
 	/** The Constant LOG. */
 	private static final Logger LOG = LoggerFactory
 			.getLogger(UserModelImpl.class);
+	
+	private static final String DEV_S3_BUCKET="user.assets.dev.buckbuddy.com";
 
 	/** The rethink db. */
 	private static RethinkDB rethinkDB;
