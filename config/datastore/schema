@@ -2,7 +2,7 @@
 r.dbCreate('buckbuddy');
 
 # create tables
-r.db('buckbuddy').tableCreate('user', {primaryKey: 'email'});
+r.db('buckbuddy').tableCreate('user', {primaryKey: 'userId'});
 r.db('buckbuddy').tableCreate('campaign'), {primaryKey: 'campaignId'};
 r.db('buckbuddy').tableCreate('donation'), {primaryKey: 'transactionId'};
 
