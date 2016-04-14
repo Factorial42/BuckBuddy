@@ -136,7 +136,7 @@ public class User {
 		String[] nameArray = null;
 		this.name = name;
 		nameArray = name!=null?name.split(" "):new String[]{};
-		if (nameArray.length >= 2) {
+		if (nameArray.length >= 3) {
 			this.setFirstName(nameArray[0]);
 			this.setMiddleName(nameArray[1]);
 			this.setLastName(nameArray[2]);
