@@ -381,7 +381,7 @@ public class User {
 		user.setSocialProfiles(socialProfile);
 		user.setName(fbUser.getName());
 		
-		user.setEmail(user.getEmail());
+		user.setEmail(fbUser.getEmail());
 
 		return user;
 	}
