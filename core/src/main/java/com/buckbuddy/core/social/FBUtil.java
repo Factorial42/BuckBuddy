@@ -17,6 +17,7 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.oauth.OAuth20Service;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
+import com.restfb.FacebookClient.AccessToken;
 import com.restfb.Parameter;
 import com.restfb.Version;
 import com.restfb.types.User;
@@ -33,7 +34,7 @@ public class FBUtil {
 	private static String apiKey = "1530924480549533";
 	private static String apiSecret = "3fd3833bc39892ff31e9ede4e67d1160";
 	private static String callback = "http://dev.buckbuddy.com/";
-	private static String scope = "email,publish_stream,status_update";
+	private static String scope = "email,public_profile";
 	private static List<String> profiles = Arrays.asList("me", "me/picture");
 
 	// to handle OAuth with FB
@@ -49,13 +50,22 @@ public class FBUtil {
 		return OAUTH_SERVICE.getAuthorizationUrl();
 	}
 
-	public static OAuth2AccessToken extendToken(String code) {
+	public static OAuth2AccessToken getAccessToken(String code) {
 		return OAUTH_SERVICE.getAccessToken(code);
 	}
 
-	public static User getProfile(OAuth2AccessToken accessToken) {
+	public static AccessToken extendToken(String fbToken) {
+		FacebookClient facebookClient = new DefaultFacebookClient(fbToken,
+				apiSecret, Version.LATEST);
+		AccessToken extendedFBToken = facebookClient.obtainExtendedAccessToken(
+				apiKey, apiSecret, fbToken);
+		return extendedFBToken;
+	}
+
+	public static User getProfile(String fbToken) {
+		AccessToken extendedFBToken = extendToken(fbToken);
 		FacebookClient facebookClient = new DefaultFacebookClient(
-				accessToken.getAccessToken(), apiSecret, Version.LATEST);
+				extendedFBToken.getAccessToken(), apiSecret, Version.LATEST);
 		User user = facebookClient.fetchObject("me", User.class);
 		user = facebookClient.fetchObject(user.getId(), User.class, Parameter
 				.with("fields", "name,birthday,email,picture,third_party_id"));
@@ -103,9 +113,8 @@ public class FBUtil {
 			System.out.println("Got      = " + value);
 			System.out.println();
 		}
-
-		OAuth2AccessToken accessToken = extendToken(code);
-		System.out.println(fbUtil.getProfile(accessToken));
+		OAuth2AccessToken accessToken=getAccessToken(code);
+		System.out.println(getProfile(accessToken.getAccessToken()));
 	}
 
 }

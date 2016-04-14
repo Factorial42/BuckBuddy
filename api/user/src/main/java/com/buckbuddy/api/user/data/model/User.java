@@ -368,7 +368,7 @@ public class User {
 	}
 
 	public static User createUserFromFBProfile(com.restfb.types.User fbUser,
-			OAuth2AccessToken accessToken) {
+			String fbToken) {
 		User user = new User();
 		SocialProfiles socialProfile = new SocialProfiles();
 		FacebookProfile facebookProfile = new FacebookProfile();
@@ -376,7 +376,7 @@ public class User {
 		facebookProfile.setFacebookID(fbUser.getThirdPartyId());
 		facebookProfile.setPic(fbUser.getPicture().getUrl());
 		facebookProfile.setEmail(fbUser.getEmail());
-		facebookProfile.setUserAccessToken(accessToken.getAccessToken());
+		facebookProfile.setUserAccessToken(fbToken);
 		socialProfile.setFacebookProfile(facebookProfile);
 		user.setSocialProfiles(socialProfile);
 		user.setName(fbUser.getName());

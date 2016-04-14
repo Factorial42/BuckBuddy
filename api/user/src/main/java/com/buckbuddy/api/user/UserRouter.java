@@ -25,11 +25,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.github.scribejava.core.model.OAuth2AccessToken;
-
-
-
-
 
 // TODO: Auto-generated Javadoc
 /**
@@ -219,49 +214,48 @@ public class UserRouter {
 							"message", "Email & Password are mandatory"));
 					res.type("application/json");
 					return mapper.writeValueAsString(buckbuddyResponse);
-				} 
+				}
 				Map<String, Object> response = userModelImpl.create(user);
 				if (response != null
 						&& response.get("inserted") instanceof Long
 						&& ((Long) response.get("inserted")) > 0) {
 
 					// success flow
-					res.status(201);
-					// generate token
-					User userFromDB = userModelImpl.getByEmail(user.getEmail());
-					token = JJWTUtil.issueToken(userFromDB.getUserId());
-					userFromDB.setToken(token);
-					buckbuddyResponse.setData(mapper.convertValue(userFromDB,
-							ObjectNode.class));
-					res.type("application/json");
-					return mapper.writeValueAsString(buckbuddyResponse);
-				} else if (response != null
-						&& response.get("errors") instanceof Long
-						&& ((Long) response.get("errors")) > 0) {
-	
-					// failure flow
-					res.status(401);
-					buckbuddyResponse.setError(mapper.createObjectNode().put(
-							"message", (String) response.get("first_error")));
-					res.type("application/json");
-					return mapper.writeValueAsString(buckbuddyResponse);
-				} else {
-					// failure flow
-					res.status(500);
-					buckbuddyResponse.setError(mapper.createObjectNode().put(
-							"message", BuckBuddyException.UNKNOWN));
-					res.type("application/json");
-					return mapper.writeValueAsString(buckbuddyResponse);
-				}				
-			} catch (UserDataException ude) {
-				res.status(500);
+				res.status(201);
+				// generate token
+				User userFromDB = userModelImpl.getByEmail(user.getEmail());
+				token = JJWTUtil.issueToken(userFromDB.getUserId());
+				userFromDB.setToken(token);
+				buckbuddyResponse.setData(mapper.convertValue(userFromDB,
+						ObjectNode.class));
 				res.type("application/json");
-				buckbuddyResponse.setError(mapper
-						.createObjectNode().put("message",
-								BuckBuddyException.UNKNOWN));
+				return mapper.writeValueAsString(buckbuddyResponse);
+			} else if (response != null
+					&& response.get("errors") instanceof Long
+					&& ((Long) response.get("errors")) > 0) {
+
+				// failure flow
+				res.status(401);
+				buckbuddyResponse.setError(mapper.createObjectNode().put(
+						"message", (String) response.get("first_error")));
+				res.type("application/json");
+				return mapper.writeValueAsString(buckbuddyResponse);
+			} else {
+				// failure flow
+				res.status(500);
+				buckbuddyResponse.setError(mapper.createObjectNode().put(
+						"message", BuckBuddyException.UNKNOWN));
+				res.type("application/json");
 				return mapper.writeValueAsString(buckbuddyResponse);
 			}
-		});
+		} catch (UserDataException ude) {
+			res.status(500);
+			res.type("application/json");
+			buckbuddyResponse.setError(mapper.createObjectNode().put("message",
+					BuckBuddyException.UNKNOWN));
+			return mapper.writeValueAsString(buckbuddyResponse);
+		}
+	}	);
 
 		// regular user login
 		post("/users/login",
@@ -298,7 +292,7 @@ public class UserRouter {
 									.createObjectNode().put("message",
 											"Passwords do not match"));
 							return mapper.writeValueAsString(buckbuddyResponse);
-						} 
+						}
 
 						// else generate token
 						String token = JJWTUtil.issueToken(userFromDB
@@ -323,13 +317,12 @@ public class UserRouter {
 											BuckBuddyException.UNKNOWN));
 							return mapper.writeValueAsString(buckbuddyResponse);
 						}
-						
+
 					} catch (BuckBuddyException e) {
 						res.status(500);
 						res.type("application/json");
-						buckbuddyResponse.setError(mapper
-								.createObjectNode().put("message",
-										BuckBuddyException.UNKNOWN));
+						buckbuddyResponse.setError(mapper.createObjectNode()
+								.put("message", BuckBuddyException.UNKNOWN));
 						return mapper.writeValueAsString(buckbuddyResponse);
 					}
 				});
@@ -345,103 +338,109 @@ public class UserRouter {
 		});
 
 		// get fb user profile
-		get("/users/fb/profile",
-				(req, res) -> {
-					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
-					String fbToken = req.queryParams("fbToken");
-					OAuth2AccessToken accessToken = FBUtil.extendToken(fbToken);
-					com.restfb.types.User fbUser = FBUtil
-							.getProfile(accessToken);
-					res.type("application/json");
-					User user = userModelImpl.createUserFromFBProfile(fbUser,
-							accessToken);
-					if (user != null
-							&& user.getSocialProfiles() != null
-							&& user.getSocialProfiles().getFacebookProfile() != null
-							&& user.getSocialProfiles().getFacebookProfile()
-									.getFacebookID() != null) {
-						res.status(200);
-						res.type("application/json");
-						buckbuddyResponse.setData(mapper.convertValue(user,
-								ObjectNode.class));			
-						return mapper.writeValueAsString(buckbuddyResponse);			
-					} else {
-						res.status(500);
-						res.type("application/json");
-						buckbuddyResponse.setError(mapper
-								.createObjectNode().put("message",
-										BuckBuddyException.UNKNOWN));
-						return mapper.writeValueAsString(buckbuddyResponse);
-					}
-				});
+		get("/users/fb/profile", (req, res) -> {
+			BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+			String fbToken = req.queryParams("fbToken");
+			com.restfb.types.User fbUser = FBUtil.getProfile(fbToken);
+			res.type("application/json");
+			User user = userModelImpl.createUserFromFBProfile(fbUser, fbToken);
+			if (user != null
+					&& user.getSocialProfiles() != null
+					&& user.getSocialProfiles().getFacebookProfile() != null
+					&& user.getSocialProfiles().getFacebookProfile()
+							.getFacebookID() != null) {
+				res.status(200);
+				res.type("application/json");
+				buckbuddyResponse.setData(mapper.convertValue(user,
+						ObjectNode.class));
+				return mapper.writeValueAsString(buckbuddyResponse);
+			} else {
+				res.status(500);
+				res.type("application/json");
+				buckbuddyResponse.setError(mapper.createObjectNode().put(
+						"message", BuckBuddyException.UNKNOWN));
+				return mapper.writeValueAsString(buckbuddyResponse);
+			}
+		});
 
 		post("/users/fb/signup",
 				(req, res) -> {
 
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					try {
-						Map<String, Object> usermap = mapper.readValue(req.body(), Map.class);
+						Map<String, Object> usermap = mapper.readValue(
+								req.body(), Map.class);
 
 						// check for email and token - mandatory fields
-						if (usermap.get("name") == null || ((String)usermap.get("name")).isEmpty()
-								|| usermap.get("email") == null || ((String)usermap.get("email")).isEmpty() 
-								|| usermap.get("fbToken") == null || ((String)usermap.get("fbToken")).isEmpty()) {
+						if (usermap.get("name") == null
+								|| ((String) usermap.get("name")).isEmpty()
+								|| usermap.get("email") == null
+								|| ((String) usermap.get("email")).isEmpty()
+								|| usermap.get("fbToken") == null
+								|| ((String) usermap.get("fbToken")).isEmpty()) {
 							res.status(400);
-							buckbuddyResponse.setError(mapper.createObjectNode().put(
-									"message", "Name, Email & Token are mandatory"));
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"Name, Email & Token are mandatory"));
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
-						} 
-						
-						OAuth2AccessToken accessToken = FBUtil.extendToken(((String)usermap.get("fbToken")));
+						}
+
 						com.restfb.types.User fbUser = FBUtil
-								.getProfile(accessToken);
+								.getProfile(((String) usermap.get("fbToken")));
 						res.type("application/json");
-						User user = userModelImpl.createUserFromFBProfile(fbUser,
-								accessToken);
-						user.setName(((String)usermap.get("name")));
-						user.setEmail(((String)usermap.get("email")));
-						
-						Map<String, Object> response = userModelImpl
-								.create(user, Boolean.FALSE);
+						User user = userModelImpl.createUserFromFBProfile(
+								fbUser, ((String) usermap.get("fbToken")));
+						user.setName(((String) usermap.get("name")));
+						user.setEmail(((String) usermap.get("email")));
+
+						Map<String, Object> response = userModelImpl.create(
+								user, Boolean.FALSE);
 						if (response != null
 								&& response.get("inserted") instanceof Long
 								&& ((Long) response.get("inserted")) > 0) {
 							// success flow
 							res.status(201);
 							// generate token
-							User userFromDB = userModelImpl.getByEmail(user.getEmail());
-							String loginToken = JJWTUtil.issueToken(userFromDB.getUserId());
+							User userFromDB = userModelImpl.getByEmail(user
+									.getEmail());
+							String loginToken = JJWTUtil.issueToken(userFromDB
+									.getUserId());
 							userFromDB.setToken(loginToken);
-							buckbuddyResponse.setData(mapper.convertValue(userFromDB,
-									ObjectNode.class));
+							buckbuddyResponse.setData(mapper.convertValue(
+									userFromDB, ObjectNode.class));
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
 						} else if (response != null
 								&& response.get("errors") instanceof Long
 								&& ((Long) response.get("errors")) > 0) {
-			
+
 							// failure flow
 							res.status(401);
-							buckbuddyResponse.setError(mapper.createObjectNode().put(
-									"message", (String) response.get("first_error")));
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put(
+											"message",
+											(String) response
+													.get("first_error")));
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
 						} else {
 							// failure flow
 							res.status(500);
-							buckbuddyResponse.setError(mapper.createObjectNode().put(
-									"message", BuckBuddyException.UNKNOWN));
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											BuckBuddyException.UNKNOWN));
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
 						}
-						
+
 					} catch (UserDataException ude) {
 						res.status(500);
 						res.type("application/json");
-						buckbuddyResponse.setError(mapper
-								.createObjectNode().put("message",
-										BuckBuddyException.UNKNOWN));
+						buckbuddyResponse.setError(mapper.createObjectNode()
+								.put("message", BuckBuddyException.UNKNOWN));
 						return mapper.writeValueAsString(buckbuddyResponse);
 					}
 				});
@@ -450,9 +449,7 @@ public class UserRouter {
 				(req, res) -> {
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					String fbToken = req.queryParams("fbToken");
-					OAuth2AccessToken accessToken = FBUtil.extendToken(fbToken);
-					com.restfb.types.User fbUser = FBUtil
-							.getProfile(accessToken);
+					com.restfb.types.User fbUser = FBUtil.getProfile(fbToken);
 
 					try {
 						User userFromDB = userModelImpl.getByFBId(fbUser
@@ -468,7 +465,7 @@ public class UserRouter {
 									.createObjectNode().put("message",
 											"User not found"));
 							return mapper.writeValueAsString(buckbuddyResponse);
-						} 
+						}
 
 						// else generate token
 						String token = JJWTUtil.issueToken(userFromDB
@@ -497,9 +494,8 @@ public class UserRouter {
 					} catch (BuckBuddyException e) {
 						res.status(500);
 						res.type("application/json");
-						buckbuddyResponse.setError(mapper
-								.createObjectNode().put("message",
-										BuckBuddyException.UNKNOWN));
+						buckbuddyResponse.setError(mapper.createObjectNode()
+								.put("message", BuckBuddyException.UNKNOWN));
 						return mapper.writeValueAsString(buckbuddyResponse);
 					}
 				});

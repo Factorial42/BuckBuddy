@@ -15,7 +15,6 @@ import com.buckbuddy.core.exceptions.BuckBuddyException;
 import com.buckbuddy.core.security.SecurityUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.rethinkdb.RethinkDB;
 import com.rethinkdb.net.Connection;
 import com.rethinkdb.net.Cursor;
@@ -29,8 +28,8 @@ public class UserModelImpl implements UserModel {
 	/** The Constant LOG. */
 	private static final Logger LOG = LoggerFactory
 			.getLogger(UserModelImpl.class);
-	
-	private static final String DEV_S3_BUCKET="user.assets.dev.buckbuddy.com";
+
+	private static final String DEV_S3_BUCKET = "user.assets.dev.buckbuddy.com";
 
 	/** The rethink db. */
 	private static RethinkDB rethinkDB;
@@ -189,7 +188,8 @@ public class UserModelImpl implements UserModel {
 
 	@Override
 	public User getByFBId(String fbId) throws UserDataException {
-		Map<String, Object> userResponse=new HashMap<>();;
+		Map<String, Object> userResponse = new HashMap<>();
+		;
 		try {
 			Cursor cursor = rethinkDB
 					.table("user")
@@ -198,8 +198,8 @@ public class UserModelImpl implements UserModel {
 							rethinkDB.hashMap("facebookProfile",
 									rethinkDB.hashMap("facebookID", fbId))))
 					.run(conn);
-			if(cursor.hasNext()) {
-				userResponse=(Map<String, Object>) cursor.next();
+			if (cursor.hasNext()) {
+				userResponse = (Map<String, Object>) cursor.next();
 				userResponse = User.obfuscate(userResponse);
 			}
 			return mapper.convertValue(userResponse, User.class);
@@ -263,8 +263,8 @@ public class UserModelImpl implements UserModel {
 	}
 
 	public User createUserFromFBProfile(com.restfb.types.User fbUser,
-			OAuth2AccessToken accessToken) {
-		return User.createUserFromFBProfile(fbUser, accessToken);
+			String fbToken) {
+		return User.createUserFromFBProfile(fbUser, fbToken);
 	}
 
 	/**

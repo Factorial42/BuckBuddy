@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.buckbuddy.api.user.data.model.User;
 import com.buckbuddy.core.exceptions.BuckBuddyException;
-import com.github.scribejava.core.model.OAuth2AccessToken;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -106,7 +105,7 @@ public interface UserModel {
 			throws UserDataException;
 
 	public User createUserFromFBProfile(com.restfb.types.User user,
-			OAuth2AccessToken accessToken);
+			String fbToken);
 
 	public User getByFBId(String fbId) throws UserDataException;
 
