@@ -78,3 +78,17 @@ Server: Jetty(9.3.2.v20150730)
 
 {"data":{"userId":"782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac","token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3ODIxNTk3MDhlOWJiM2UzYWY1YzliZGYxZmY3N2Y3MDgyMzQxOGQxNjk3MGViODJmZTRkN2UxY2E1Y2E2OWFjIn0.mKQeq7mNQodV-ZV1Epg5gPihPN8EAygEAGvmGPHhg68tlxkwo6gQN7jLXQVNH7tSwnDdy-E6LbFxz08Z7fOayg","authenticated":true,"createdAt":1460535981.233,"lastUpdatedAt":1460535981.233,"firstName":"Bucky","middleName":"One","lastName":"Tester","email":"bucky_ykqhoax_tester@tfbnw.net","s3handle":"7d913c52511e1ad37d82acb1573b5b39","socialProfiles":{"facebookProfile":{"name":"Bucky One Tester","facebookID":"gT8evSo8fJiiZEeEjhnfaIQdyE4","pic":"https://scontent.xx.fbcdn.net/hprofile-xfa1/v/t1.0-1/c15.0.50.50/p50x50/10354686_10150004552801856_220367501106153455_n.jpg?oh=de3cf921c79d63ac0e908353690899f6&oe=5785D22F","firstName":null,"middleName":null,"lastName":null,"email":"bucky_ykqhoax_tester@tfbnw.net","userAccessToken":"CAAVwXiHXUp0BAAygkvbrZBT4E91TOkcYsZA3VCtFemqkGVfMHxKdMjh7zwe0mFwuZBgPf48MoAIUVlHvmJXXa13Gg6yZA8CoABo7pWxIW49vZATKG1ZAW7DSd9ayZB7yKfoqhw9Bxwm0JDUMhowwI6e9tN4jmEwOfsKAJp0m2Lejm0ZAxtLjExIvdgZBFBTc9YZAQZD","appAccessToken":null,"pageAccessToken":null,"clientToken":null},"twitterProfile":null,"whatsappProfile":null,"smsProfile":null},"active":true},"error":null}
 
+## Pic upload
+Req:
+curl -XPOST 'localhost:4567/users/782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac/uploadProfilePic'  -F "filecomment=This is an image file" -F "image=@/Users/jtandalai/Downloads/Fresh_Brothers_65x35.png"
+
+Res:
+HTTP/1.1 100 Continue
+
+HTTP/1.1 200 OK
+Date: Fri, 15 Apr 2016 17:14:45 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{}
