@@ -6,8 +6,17 @@ import static spark.Spark.patch;
 import static spark.Spark.post;
 import static spark.Spark.put;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +30,7 @@ import com.buckbuddy.core.exceptions.BuckBuddyException;
 import com.buckbuddy.core.security.JJWTUtil;
 import com.buckbuddy.core.security.SecurityUtil;
 import com.buckbuddy.core.social.FBUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.buckbuddy.core.utils.AWSS3Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -34,6 +43,11 @@ public class UserRouter {
 
 	/** The Constant LOG. */
 	private static final Logger LOG = LoggerFactory.getLogger(UserRouter.class);
+
+	private static final String S3_BUCKET = "user.assets.dev.buckbuddy.com";
+
+	private static final String ASSETS_URL = "http://user.assets.dev.buckbuddy.com/";
+	private static final String USER_PROFILE_PIC_PREFIX = "profile.pic";
 
 	/** The Constant mapper. */
 	private static final ObjectMapper mapper = new ObjectMapper()
@@ -129,18 +143,15 @@ public class UserRouter {
 		patch("/users/:userId",
 				(req, res) -> {
 					try {
-						User user = mapper.readValue(req.body(), User.class);
-						if (user.getUserId() != null) {
+
+						Map<String, Object> userMap = mapper.readValue(
+								req.body(), Map.class);
+						if (userMap.get("userId") != null) {
 							res.status(403);
 							res.type("application/json");
 							return mapper.createObjectNode().put("error",
 									"User ID is required.");
 						}
-						TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
-						};
-
-						Map<String, Object> userMap = mapper.readValue(
-								req.body(), typeRef);
 
 						Map<String, Object> response = userModelImpl
 								.updatePartial(userMap);
@@ -409,6 +420,64 @@ public class UserRouter {
 							String loginToken = JJWTUtil.issueToken(userFromDB
 									.getUserId());
 							userFromDB.setToken(loginToken);
+
+							// upload pic
+							if (userFromDB.getProfilePic() != null) {
+								Path filenamePath = Paths.get(
+										userFromDB.getProfilePic().toString())
+										.getFileName();
+								String fileName = filenamePath.toString()
+										.contains("?") ? filenamePath
+										.toString().replaceAll("\\?.*", "")
+										: filenamePath.toString();
+								fileName = fileName.substring(fileName
+										.lastIndexOf("/") + 1);
+								String extension = fileName.substring(fileName
+										.lastIndexOf(".") + 1);
+								String profilePicS3Path = userFromDB
+										.getUserId()
+										+ "/"
+										+ USER_PROFILE_PIC_PREFIX
+										+ "/"
+										+ fileName;
+
+								boolean success = false;
+								try {
+									String metadataString = "image/" + extension;
+
+									success = AWSS3Util.upload(S3_BUCKET,
+											profilePicS3Path, new URL(
+													userFromDB.getProfilePic())
+													.openStream(),
+											metadataString);
+								} catch (MalformedURLException e) {
+									LOG.error("malformed Profile pic url {}",
+											userFromDB.getProfilePic());
+								}
+								if (!success) {
+									LOG.error("Could not upload profile pic"
+											+ userFromDB.getProfilePic()
+													.toString() + " for:"
+											+ userFromDB.getUserId());
+								} else {
+									userFromDB.setProfilePic(ASSETS_URL
+											+ profilePicS3Path);
+									Map<String, Object> userMap = new HashMap<>();
+									userMap.put("userId", userFromDB.getUserId());
+									userMap.put("profilePic", userFromDB.getProfilePic());
+									Map<String, Object> updateResponse = userModelImpl
+											.updatePartial(userMap);
+									if (updateResponse != null
+											&& updateResponse.get("replaced") instanceof Long
+											&& ((Long) updateResponse
+													.get("replaced")) > 0) {
+										LOG.info(
+												"Updated user {} with s3 profile pic url {}",
+												userFromDB.getUserId(),
+												userFromDB.getProfilePic());
+									}
+								}
+							}
 							buckbuddyResponse.setData(mapper.convertValue(
 									userFromDB, ObjectNode.class));
 							res.type("application/json");
@@ -501,6 +570,95 @@ public class UserRouter {
 				});
 	}
 
+	private void initializeFileRoutes() {
+		post("/users/:userId/uploadProfilePic", "multipart/form-data", (req,
+				res) -> {
+			BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+			String userId = (req.params(":userId"));
+
+			Map<String, Object> userMap = new HashMap<>();
+			userMap.put("userId", userId);
+			Path tempDirPath = Files.createTempDirectory("buckbuddy-upload");
+			// the directory location where files will be stored
+				String location = tempDirPath.toString();
+				// the maximum size allowed for uploaded files
+				long maxFileSize = 100000000;
+				// the maximum size allowed for multipart/form-data requests
+				long maxRequestSize = 100000000;
+				// the size threshold after which
+				// files will be written to disk
+				int fileSizeThreshold = 1024;
+
+				MultipartConfigElement multipartConfigElement = new MultipartConfigElement(
+						location, maxFileSize, maxRequestSize,
+						fileSizeThreshold);
+				req.raw().setAttribute("org.eclipse.jetty.multipartConfig",
+						multipartConfigElement);
+
+				Collection<Part> parts = req.raw().getParts();
+				if (LOG.isDebugEnabled()) {
+					for (Part part : parts) {
+						LOG.debug("Name: " + part.getName());
+						LOG.debug("Size: " + part.getSize());
+						LOG.debug("Filename: " + part.getSubmittedFileName());
+					}
+				}
+
+				Part uploadedFile = req.raw().getPart("image");
+
+				String fileName = uploadedFile.getSubmittedFileName().contains(
+						"?") ? uploadedFile.getSubmittedFileName().replaceAll(
+						"\\?.*", "") : uploadedFile.getSubmittedFileName();
+				fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+				String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+
+				String profilePicS3Path = userMap.get("userId") + "/"
+						+ USER_PROFILE_PIC_PREFIX + "/"
+						+ fileName;
+
+				String metadataString = "image/" + extension;
+				boolean success = AWSS3Util.upload(
+						S3_BUCKET,
+						profilePicS3Path,
+						uploadedFile.getInputStream(),
+						metadataString);
+				if (!success) {
+					LOG.error("Could not upload profile pic {} for {}",
+							uploadedFile.getSubmittedFileName().toString(),
+							userMap.get("userId"));
+					res.status(500);
+					res.type("application/json");
+					buckbuddyResponse.setError(mapper.createObjectNode().put(
+							"message", "Could not upload profile pic."));
+					return mapper.writeValueAsString(buckbuddyResponse);
+
+				} else {
+					userMap.put("profilePic", ASSETS_URL + profilePicS3Path);
+					Map<String, Object> updateResponse = userModelImpl
+							.updatePartial(userMap);
+					if (updateResponse != null
+							&& updateResponse.get("replaced") instanceof Long
+							&& ((Long) updateResponse.get("replaced")) > 0) {
+						LOG.info("Updated user {} with s3 profile pic url {}",
+								userMap.get("userId"), userMap.get("profilePic"));
+
+						res.status(200);
+						res.type("application/json");
+						return mapper.writeValueAsString(buckbuddyResponse);
+					} else {
+						res.status(500);
+						res.type("application/json");
+						buckbuddyResponse
+								.setError(mapper
+										.createObjectNode()
+										.put("message",
+												"Could not update user with profile pic url"));
+						return mapper.writeValueAsString(buckbuddyResponse);
+					}
+				}
+			});
+	}
+
 	/**
 	 * The main method.
 	 *
@@ -511,6 +669,7 @@ public class UserRouter {
 		UserRouter userRouter = new UserRouter();
 		userRouter.initializeCRUDRoutes();
 		userRouter.initializeLoginRoutes();
+		userRouter.initializeFileRoutes();
 	}
 
 }

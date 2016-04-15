@@ -3,6 +3,8 @@
  */
 package com.buckbuddy.core.social;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -11,6 +13,7 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.buckbuddy.core.utils.AWSS3Util;
 import com.github.scribejava.apis.FacebookApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
@@ -20,7 +23,9 @@ import com.restfb.FacebookClient;
 import com.restfb.FacebookClient.AccessToken;
 import com.restfb.Parameter;
 import com.restfb.Version;
+import com.restfb.json.JsonObject;
 import com.restfb.types.User;
+import com.restfb.types.User.Picture;
 
 /**
  * @author jtandalai
@@ -62,25 +67,34 @@ public class FBUtil {
 		return extendedFBToken;
 	}
 
-	public static User getProfile(String fbToken) {
+	public static User getProfile(String fbToken) throws IOException {
 		AccessToken extendedFBToken = extendToken(fbToken);
 		FacebookClient facebookClient = new DefaultFacebookClient(
 				extendedFBToken.getAccessToken(), apiSecret, Version.LATEST);
 		User user = facebookClient.fetchObject("me", User.class);
 		user = facebookClient.fetchObject(user.getId(), User.class, Parameter
 				.with("fields", "name,birthday,email,picture,third_party_id"));
+
+		JsonObject picture = facebookClient.fetchObject("me/picture",
+				JsonObject.class, Parameter.with("width", "125"), // the image size
+				Parameter.with("redirect", "false"));
+		user.getPicture().setHeight(picture.getJsonObject("data").getInt("height"));
+		user.getPicture().setWidth(picture.getJsonObject("data").getInt("width"));
+		user.getPicture().setUrl(picture.getJsonObject("data").getString("url"));
+		
 		return user;
 	}
 
 	/**
 	 * @param args
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		FBUtil fbUtil = new FBUtil();
 		fbUtil.testCompleteFlow();
 	}
 
-	private void testCompleteFlow() {
+	private void testCompleteFlow() throws IOException {
 		FBUtil fbUtil = new FBUtil();
 		String NETWORK_NAME = "Facebook";
 		String secretState = "secret" + new Random().nextInt(999999);
@@ -113,7 +127,7 @@ public class FBUtil {
 			System.out.println("Got      = " + value);
 			System.out.println();
 		}
-		OAuth2AccessToken accessToken=getAccessToken(code);
+		OAuth2AccessToken accessToken = getAccessToken(code);
 		System.out.println(getProfile(accessToken.getAccessToken()));
 	}
 

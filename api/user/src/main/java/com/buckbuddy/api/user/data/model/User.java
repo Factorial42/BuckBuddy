@@ -34,7 +34,7 @@ public class User {
 	private Currency currency;
 	private String currencyString;
 	private String s3handle;
-	private URL profilePic;
+	private String profilePic;
 	private AffilicateProfile affiliateProfile;
 	private PaymentProfile paymentProfiles;
 	private SocialProfiles socialProfiles;
@@ -285,7 +285,7 @@ public class User {
 	/**
 	 * @return the profilePic
 	 */
-	public URL getProfilePic() {
+	public String getProfilePic() {
 		return profilePic;
 	}
 
@@ -293,7 +293,7 @@ public class User {
 	 * @param profilePic
 	 *            the profilePic to set
 	 */
-	public void setProfilePic(URL profilePic) {
+	public void setProfilePic(String profilePic) {
 		this.profilePic = profilePic;
 	}
 
@@ -380,6 +380,7 @@ public class User {
 		socialProfile.setFacebookProfile(facebookProfile);
 		user.setSocialProfiles(socialProfile);
 		user.setName(fbUser.getName());
+		user.setProfilePic(fbUser.getPicture().getUrl());
 		
 		user.setEmail(fbUser.getEmail());
 

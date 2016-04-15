@@ -140,6 +140,7 @@ public class UserModelImpl implements UserModel {
 
 		Map<String, Object> userResponse;
 		try {
+			// encrypt password
 			if (user.get("password") != null
 					&& !((String) user.get("password")).isEmpty()) {
 				user.put("password", SecurityUtil.encrypt(
