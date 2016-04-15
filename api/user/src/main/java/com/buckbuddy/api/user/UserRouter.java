@@ -644,6 +644,9 @@ public class UserRouter {
 
 						res.status(200);
 						res.type("application/json");
+						buckbuddyResponse.setData(mapper.convertValue(
+								userMap,
+								ObjectNode.class));
 						return mapper.writeValueAsString(buckbuddyResponse);
 					} else {
 						res.status(500);
