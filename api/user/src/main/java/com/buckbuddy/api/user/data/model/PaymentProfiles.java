@@ -7,14 +7,14 @@ package com.buckbuddy.api.user.data.model;
  * @author jtandalai
  *
  */
-public class PaymentProfile {
+public class PaymentProfiles {
 
-	private Stripe partner;
+	private Stripe stripe;
 
 	/**
 	 * 
 	 */
-	public PaymentProfile() {
+	public PaymentProfiles() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -22,7 +22,7 @@ public class PaymentProfile {
 	 * @return the partner
 	 */
 	public Stripe getPartner() {
-		return partner;
+		return stripe;
 	}
 
 	/**
@@ -30,7 +30,7 @@ public class PaymentProfile {
 	 *            the partner to set
 	 */
 	public void setPartner(Stripe partner) {
-		this.partner = partner;
+		this.stripe = partner;
 	}
 
 	/* (non-Javadoc)
@@ -40,7 +40,7 @@ public class PaymentProfile {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((partner == null) ? 0 : partner.hashCode());
+		result = prime * result + ((stripe == null) ? 0 : stripe.hashCode());
 		return result;
 	}
 
@@ -55,15 +55,15 @@ public class PaymentProfile {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof PaymentProfile)) {
+		if (!(obj instanceof PaymentProfiles)) {
 			return false;
 		}
-		PaymentProfile other = (PaymentProfile) obj;
-		if (partner == null) {
-			if (other.partner != null) {
+		PaymentProfiles other = (PaymentProfiles) obj;
+		if (stripe == null) {
+			if (other.stripe != null) {
 				return false;
 			}
-		} else if (!partner.equals(other.partner)) {
+		} else if (!stripe.equals(other.stripe)) {
 			return false;
 		}
 		return true;
@@ -74,7 +74,7 @@ public class PaymentProfile {
 	 */
 	@Override
 	public String toString() {
-		return "PaymentProfile [partner=" + partner + "]";
+		return "PaymentProfile [partner=" + stripe + "]";
 	}
 
 	/**

@@ -24,13 +24,16 @@ import org.slf4j.LoggerFactory;
 import com.buckbuddy.api.user.data.UserDataException;
 import com.buckbuddy.api.user.data.UserModel;
 import com.buckbuddy.api.user.data.UserModelImpl;
+import com.buckbuddy.api.user.data.model.Stripe;
 import com.buckbuddy.api.user.data.model.User;
 import com.buckbuddy.core.BuckBuddyResponse;
 import com.buckbuddy.core.exceptions.BuckBuddyException;
+import com.buckbuddy.core.payment.StripeUtil;
 import com.buckbuddy.core.security.JJWTUtil;
 import com.buckbuddy.core.security.SecurityUtil;
 import com.buckbuddy.core.social.FBUtil;
 import com.buckbuddy.core.utils.AWSS3Util;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -443,7 +446,8 @@ public class UserRouter {
 
 								boolean success = false;
 								try {
-									String metadataString = "image/" + extension;
+									String metadataString = "image/"
+											+ extension;
 
 									success = AWSS3Util.upload(S3_BUCKET,
 											profilePicS3Path, new URL(
@@ -463,8 +467,10 @@ public class UserRouter {
 									userFromDB.setProfilePic(ASSETS_URL
 											+ profilePicS3Path);
 									Map<String, Object> userMap = new HashMap<>();
-									userMap.put("userId", userFromDB.getUserId());
-									userMap.put("profilePic", userFromDB.getProfilePic());
+									userMap.put("userId",
+											userFromDB.getUserId());
+									userMap.put("profilePic",
+											userFromDB.getProfilePic());
 									Map<String, Object> updateResponse = userModelImpl
 											.updatePartial(userMap);
 									if (updateResponse != null
@@ -570,7 +576,7 @@ public class UserRouter {
 				});
 	}
 
-	private void initializeFileRoutes() {
+	private void initializeProfileRoutes() {
 		post("/users/:userId/uploadProfilePic", "multipart/form-data", (req,
 				res) -> {
 			BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
@@ -613,15 +619,11 @@ public class UserRouter {
 				String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
 				String profilePicS3Path = userMap.get("userId") + "/"
-						+ USER_PROFILE_PIC_PREFIX + "/"
-						+ fileName;
+						+ USER_PROFILE_PIC_PREFIX + "/" + fileName;
 
 				String metadataString = "image/" + extension;
-				boolean success = AWSS3Util.upload(
-						S3_BUCKET,
-						profilePicS3Path,
-						uploadedFile.getInputStream(),
-						metadataString);
+				boolean success = AWSS3Util.upload(S3_BUCKET, profilePicS3Path,
+						uploadedFile.getInputStream(), metadataString);
 				if (!success) {
 					LOG.error("Could not upload profile pic {} for {}",
 							uploadedFile.getSubmittedFileName().toString(),
@@ -640,12 +642,12 @@ public class UserRouter {
 							&& updateResponse.get("replaced") instanceof Long
 							&& ((Long) updateResponse.get("replaced")) > 0) {
 						LOG.info("Updated user {} with s3 profile pic url {}",
-								userMap.get("userId"), userMap.get("profilePic"));
+								userMap.get("userId"),
+								userMap.get("profilePic"));
 
 						res.status(200);
 						res.type("application/json");
-						buckbuddyResponse.setData(mapper.convertValue(
-								userMap,
+						buckbuddyResponse.setData(mapper.convertValue(userMap,
 								ObjectNode.class));
 						return mapper.writeValueAsString(buckbuddyResponse);
 					} else {
@@ -660,6 +662,37 @@ public class UserRouter {
 					}
 				}
 			});
+
+		post("/users/:userId/paymentProfile",
+				(req, res) -> {
+					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+					String userId = (req.params(":userId"));
+					String authorizationCode = (req.queryParams("code"));
+
+					JsonNode paymentStripeProfileNode = StripeUtil
+							.getAccessToken(authorizationCode);
+					ObjectNode paymentProfileNode = mapper.createObjectNode();
+					paymentProfileNode.put("stripe", paymentStripeProfileNode);
+					Map<String, Object> userMap = new HashMap<>();
+					userMap.put("userId", userId);
+					userMap.put("paymentProfiles", mapper.convertValue(paymentProfileNode, Map.class));
+
+					Map<String, Object> response = userModelImpl
+							.updatePartial(userMap);
+
+					if (response != null
+							&& response.get("replaced") instanceof Long
+							&& ((Long) response.get("replaced")) > 0) {
+						res.status(204);
+						res.type("application/json");
+					} else if (response != null
+							&& response.get("errors") instanceof Long
+							&& ((Long) response.get("errors")) > 0) {
+						res.status(500);
+						res.type("application/json");
+					}
+					return mapper.writeValueAsString(buckbuddyResponse);
+				});
 	}
 
 	/**
@@ -672,7 +705,7 @@ public class UserRouter {
 		UserRouter userRouter = new UserRouter();
 		userRouter.initializeCRUDRoutes();
 		userRouter.initializeLoginRoutes();
-		userRouter.initializeFileRoutes();
+		userRouter.initializeProfileRoutes();
 	}
 
 }

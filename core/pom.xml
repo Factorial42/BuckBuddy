@@ -22,6 +22,7 @@
 		<jackson.databind.version>2.7.3</jackson.databind.version>
 		<jackson.datatype.jsr310.version>2.7.3</jackson.datatype.jsr310.version>
 		<aws.java.sdk.s3>1.10.69</aws.java.sdk.s3>
+		<stripe.version>2.2.0</stripe.version>
 	</properties>
 
 	<dependencies>
@@ -71,6 +72,11 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>${aws.java.sdk.s3}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>${stripe.version}</version>
 		</dependency>
 	</dependencies>
 

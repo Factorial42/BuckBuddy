@@ -36,7 +36,7 @@ public class User {
 	private String s3handle;
 	private String profilePic;
 	private AffilicateProfile affiliateProfile;
-	private PaymentProfile paymentProfiles;
+	private PaymentProfiles paymentProfiles;
 	private SocialProfiles socialProfiles;
 	private Boolean active;
 
@@ -315,7 +315,7 @@ public class User {
 	/**
 	 * @return the paymentProfiles
 	 */
-	public PaymentProfile getPaymentProfiles() {
+	public PaymentProfiles getPaymentProfiles() {
 		return paymentProfiles;
 	}
 
@@ -323,7 +323,7 @@ public class User {
 	 * @param paymentProfiles
 	 *            the paymentProfiles to set
 	 */
-	public void setPaymentProfiles(PaymentProfile paymentProfiles) {
+	public void setPaymentProfiles(PaymentProfiles paymentProfiles) {
 		this.paymentProfiles = paymentProfiles;
 	}
 

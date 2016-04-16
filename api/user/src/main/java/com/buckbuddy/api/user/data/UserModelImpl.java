@@ -115,7 +115,7 @@ public class UserModelImpl implements UserModel {
 
 		Map<String, Object> userResponse;
 		try {
-			userResponse = rethinkDB.table("user")
+			userResponse = rethinkDB.table("user").get("userId")
 					.replace(rethinkDB.expr(user)).run(conn);
 			return userResponse;
 		} catch (Exception e) {
@@ -146,7 +146,7 @@ public class UserModelImpl implements UserModel {
 				user.put("password", SecurityUtil.encrypt(
 						(String) user.get("password"), SecurityUtil.SHA_256));
 			}
-			userResponse = rethinkDB.table("user").update(rethinkDB.expr(user))
+			userResponse = rethinkDB.table("user").get(user.get("userId")).update(rethinkDB.expr(user))
 					.run(conn);
 			return userResponse;
 		} catch (Exception e) {

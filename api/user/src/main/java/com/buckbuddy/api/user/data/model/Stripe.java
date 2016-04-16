@@ -12,6 +12,14 @@ public class Stripe {
 	private String name;
 	private String accountId;
 	private String country;
+	private String accessToken;
+	private Boolean liveMode;
+	private String refreshToken;
+	private String tokenType;
+	private String stripePublishableKey;
+	private String stripeUserId;
+	private String scope;
+
 
 	/**
 	 * 
@@ -65,13 +73,115 @@ public class Stripe {
 		this.country = country;
 	}
 
+	/**
+	 * @return the accessToken
+	 */
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	/**
+	 * @param accessToken the accessToken to set
+	 */
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	/**
+	 * @return the liveMode
+	 */
+	public Boolean getLiveMode() {
+		return liveMode;
+	}
+
+	/**
+	 * @param liveMode the liveMode to set
+	 */
+	public void setLiveMode(Boolean liveMode) {
+		this.liveMode = liveMode;
+	}
+
+	/**
+	 * @return the refreshToken
+	 */
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
+	/**
+	 * @param refreshToken the refreshToken to set
+	 */
+	public void setRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+	}
+
+	/**
+	 * @return the tokenType
+	 */
+	public String getTokenType() {
+		return tokenType;
+	}
+
+	/**
+	 * @param tokenType the tokenType to set
+	 */
+	public void setTokenType(String tokenType) {
+		this.tokenType = tokenType;
+	}
+
+	/**
+	 * @return the stripePublishableKey
+	 */
+	public String getStripePublishableKey() {
+		return stripePublishableKey;
+	}
+
+	/**
+	 * @param stripePublishableKey the stripePublishableKey to set
+	 */
+	public void setStripePublishableKey(String stripePublishableKey) {
+		this.stripePublishableKey = stripePublishableKey;
+	}
+
+	/**
+	 * @return the stripeUserId
+	 */
+	public String getStripeUserId() {
+		return stripeUserId;
+	}
+
+	/**
+	 * @param stripeUserId the stripeUserId to set
+	 */
+	public void setStripeUserId(String stripeUserId) {
+		this.stripeUserId = stripeUserId;
+	}
+
+	/**
+	 * @return the scope
+	 */
+	public String getScope() {
+		return scope;
+	}
+
+	/**
+	 * @param scope the scope to set
+	 */
+	public void setScope(String scope) {
+		this.scope = scope;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		return "Stripe [name=" + name + ", accountId=" + accountId
-				+ ", country=" + country + "]";
+				+ ", country=" + country + ", accessToken=" + accessToken
+				+ ", liveMode=" + liveMode + ", refreshToken=" + refreshToken
+				+ ", tokenType=" + tokenType + ", stripePublishableKey="
+				+ stripePublishableKey + ", stripeUserId=" + stripeUserId
+				+ ", scope=" + scope + "]";
 	}
 
 	/* (non-Javadoc)
@@ -82,9 +192,24 @@ public class Stripe {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
+				+ ((accessToken == null) ? 0 : accessToken.hashCode());
+		result = prime * result
 				+ ((accountId == null) ? 0 : accountId.hashCode());
 		result = prime * result + ((country == null) ? 0 : country.hashCode());
+		result = prime * result
+				+ ((liveMode == null) ? 0 : liveMode.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result
+				+ ((refreshToken == null) ? 0 : refreshToken.hashCode());
+		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
+		result = prime
+				* result
+				+ ((stripePublishableKey == null) ? 0 : stripePublishableKey
+						.hashCode());
+		result = prime * result
+				+ ((stripeUserId == null) ? 0 : stripeUserId.hashCode());
+		result = prime * result
+				+ ((tokenType == null) ? 0 : tokenType.hashCode());
 		return result;
 	}
 
@@ -103,6 +228,13 @@ public class Stripe {
 			return false;
 		}
 		Stripe other = (Stripe) obj;
+		if (accessToken == null) {
+			if (other.accessToken != null) {
+				return false;
+			}
+		} else if (!accessToken.equals(other.accessToken)) {
+			return false;
+		}
 		if (accountId == null) {
 			if (other.accountId != null) {
 				return false;
@@ -117,11 +249,53 @@ public class Stripe {
 		} else if (!country.equals(other.country)) {
 			return false;
 		}
+		if (liveMode == null) {
+			if (other.liveMode != null) {
+				return false;
+			}
+		} else if (!liveMode.equals(other.liveMode)) {
+			return false;
+		}
 		if (name == null) {
 			if (other.name != null) {
 				return false;
 			}
 		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		if (refreshToken == null) {
+			if (other.refreshToken != null) {
+				return false;
+			}
+		} else if (!refreshToken.equals(other.refreshToken)) {
+			return false;
+		}
+		if (scope == null) {
+			if (other.scope != null) {
+				return false;
+			}
+		} else if (!scope.equals(other.scope)) {
+			return false;
+		}
+		if (stripePublishableKey == null) {
+			if (other.stripePublishableKey != null) {
+				return false;
+			}
+		} else if (!stripePublishableKey.equals(other.stripePublishableKey)) {
+			return false;
+		}
+		if (stripeUserId == null) {
+			if (other.stripeUserId != null) {
+				return false;
+			}
+		} else if (!stripeUserId.equals(other.stripeUserId)) {
+			return false;
+		}
+		if (tokenType == null) {
+			if (other.tokenType != null) {
+				return false;
+			}
+		} else if (!tokenType.equals(other.tokenType)) {
 			return false;
 		}
 		return true;

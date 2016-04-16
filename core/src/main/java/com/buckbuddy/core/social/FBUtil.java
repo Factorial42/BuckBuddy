@@ -4,7 +4,6 @@
 package com.buckbuddy.core.social;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -13,7 +12,6 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.buckbuddy.core.utils.AWSS3Util;
 import com.github.scribejava.apis.FacebookApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
@@ -25,7 +23,6 @@ import com.restfb.Parameter;
 import com.restfb.Version;
 import com.restfb.json.JsonObject;
 import com.restfb.types.User;
-import com.restfb.types.User.Picture;
 
 /**
  * @author jtandalai
