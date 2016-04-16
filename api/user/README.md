@@ -92,3 +92,15 @@ Transfer-Encoding: chunked
 Server: Jetty(9.3.2.v20150730)
 
 {}
+
+## Get Access Token and update Stripe Payment profile for user
+Req:
+curl -i -XPOST 'localhost:4567/users/782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac/paymentProfile?code=ac_8HN3KMoW6NHdwvCZuWEtBBtbySE8wGeT'
+
+Res:
+HTTP/1.1 204 No Content
+Date: Sat, 16 Apr 2016 07:57:41 GMT
+Content-Type: application/json
+Server: Jetty(9.3.2.v20150730)
+
+
