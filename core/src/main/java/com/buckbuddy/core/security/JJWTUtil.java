@@ -30,11 +30,10 @@ public class JJWTUtil {
 
 	private static final String JJWT_SIGNING_ENCODED_KEY_STRING = "7mclOKr3n3+5noEVnHcqGTWAk7z3OP8G/1qDd3A9FNGIZAgWmLP6L5duyVKINKuzd8Dz0UVt5bQC5AwEMApBLA==";
 
-	private static final Key JJWT_SIGNING_KEY = 
-			new SecretKeySpec(Base64.getDecoder().decode(
-					JJWT_SIGNING_ENCODED_KEY_STRING), 0, Base64.getDecoder().decode(
-							JJWT_SIGNING_ENCODED_KEY_STRING).length, "HmacSHA512");
-			
+	private static final Key JJWT_SIGNING_KEY = new SecretKeySpec(Base64
+			.getDecoder().decode(JJWT_SIGNING_ENCODED_KEY_STRING), 0, Base64
+			.getDecoder().decode(JJWT_SIGNING_ENCODED_KEY_STRING).length,
+			"HmacSHA512");
 
 	/**
 	 * 
@@ -57,12 +56,16 @@ public class JJWTUtil {
 
 	public static boolean authenticate(String id, String token) {
 		try {
-			return Jwts.parser().setSigningKey(JJWT_SIGNING_KEY)
-					.parseClaimsJws(token).getBody().getSubject().equals(id);
+			return getSubject(token).equals(id);
 		} catch (SignatureException e) {
 			LOG.error(AUTHENTICATION_FAILURE, e);
 			return false;
 		}
+	}
+
+	public static String getSubject(String token) {
+		return Jwts.parser().setSigningKey(JJWT_SIGNING_KEY)
+				.parseClaimsJws(token).getBody().getSubject();
 	}
 
 	/**
