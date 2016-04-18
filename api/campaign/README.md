@@ -3,7 +3,7 @@
 ## General notes:
 Response structure will have "data"-holding campaign object for this service and "error"-holding any "message" specific to errors that occured in the backend elements.
 
-## create regular campaign
+## create campaign
 Req:
 curl -i -XPOST 'localhost:4567/campaigns/' -d '{"userId":"782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac", "name":"testcampaign", "amount":12.12}'
 
@@ -28,6 +28,19 @@ Transfer-Encoding: chunked
 Server: Jetty(9.3.2.v20150730)
 
 {"userId":"782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac","campaignId":"24d49175-dc95-46d8-ad33-baa02b4c5cd5","createdAt":1460925699.704000000,"lastUpdatedAt":1460925699.706000000,"name":"testcampaign","amount":12.12}
+
+## get campaign by token
+Req:
+curl -i -XGET 'localhost:4567/campaigns/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMzczMWQyYmQ2ZjJmY2YxMjllNGRmZmZmNDA1NTc5N2RiZTljYWNjYzI1NTc2ZjYyNTYxMjJiZjBhYzM0NTlmIn0.x4kBC19Z2jaU-DhnlqTJ5M000B0BhC454jhFl0GDc4jB6pAm9GT7wQWbS4dzwBSP6V-W5E4BbFO8A_DpbKbDng'
+
+Res:
+HTTP/1.1 200 OK
+Date: Mon, 18 Apr 2016 19:05:10 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"data":{"userId":"a3731d2bd6f2fcf129e4dffff4055797dbe9caccc25576f6256122bf0ac3459f","campaignId":"c7e154ff-839c-4bab-a2e7-b988654d384d","createdAt":1461006282.188,"lastUpdatedAt":1461006282.191,"name":"testcampaign","amount":12.12}}
 
 ## delete campaign
 Req:
