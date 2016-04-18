@@ -6,7 +6,6 @@ import static spark.Spark.patch;
 import static spark.Spark.post;
 import static spark.Spark.put;
 
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,14 +14,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import spark.Spark;
 
 import com.buckbuddy.api.campaign.data.CampaignDataException;
 import com.buckbuddy.api.campaign.data.CampaignModel;
@@ -425,6 +423,7 @@ public class CampaignRouter {
 	}
 
 	public static void main(String[] args) {
+		Spark.port(4568);
 		CampaignRouter campaignRouter = new CampaignRouter();
 		campaignRouter.initializeCRUDRoutes();
 		campaignRouter.initializeProfileRoutes();
