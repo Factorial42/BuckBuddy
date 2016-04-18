@@ -5,7 +5,7 @@ Response structure will have "data"-holding campaign object for this service and
 
 ## create campaign
 Req:
-curl -i -XPOST 'localhost:4567/campaigns/' -d '{"userId":"782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac", "name":"testcampaign", "amount":12.12}'
+curl -i -XPOST 'localhost:4568/campaigns/' -d '{"userId":"782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac", "name":"testcampaign", "amount":12.12}'
 
 Res:
 HTTP/1.1 201 Created
@@ -18,7 +18,7 @@ Server: Jetty(9.3.2.v20150730)
 
 ## get campaign
 Req:
-curl -i -XGET 'localhost:4567/campaigns/24d49175-dc95-46d8-ad33-baa02b4c5cd5'
+curl -i -XGET 'localhost:4568/campaigns/24d49175-dc95-46d8-ad33-baa02b4c5cd5'
 
 Res:
 HTTP/1.1 200 OK
@@ -31,7 +31,7 @@ Server: Jetty(9.3.2.v20150730)
 
 ## get campaign by token
 Req:
-curl -i -XGET 'localhost:4567/campaigns/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMzczMWQyYmQ2ZjJmY2YxMjllNGRmZmZmNDA1NTc5N2RiZTljYWNjYzI1NTc2ZjYyNTYxMjJiZjBhYzM0NTlmIn0.x4kBC19Z2jaU-DhnlqTJ5M000B0BhC454jhFl0GDc4jB6pAm9GT7wQWbS4dzwBSP6V-W5E4BbFO8A_DpbKbDng'
+curl -i -XGET 'localhost:4568/campaigns/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMzczMWQyYmQ2ZjJmY2YxMjllNGRmZmZmNDA1NTc5N2RiZTljYWNjYzI1NTc2ZjYyNTYxMjJiZjBhYzM0NTlmIn0.x4kBC19Z2jaU-DhnlqTJ5M000B0BhC454jhFl0GDc4jB6pAm9GT7wQWbS4dzwBSP6V-W5E4BbFO8A_DpbKbDng'
 
 Res:
 HTTP/1.1 200 OK
@@ -44,7 +44,7 @@ Server: Jetty(9.3.2.v20150730)
 
 ## delete campaign
 Req:
-curl -i -XDELETE 'localhost:4567/campaigns/24d49175-dc95-46d8-ad33-baa02b4c5cd5' 
+curl -i -XDELETE 'localhost:4568/campaigns/24d49175-dc95-46d8-ad33-baa02b4c5cd5' 
 
 Res:
 HTTP/1.1 204 No Content
@@ -54,7 +54,7 @@ Server: Jetty(9.3.2.v20150730)
 
 ## upload pic for a campaign
 Req:
-curl -i -XPOST 'localhost:4567/campaigns/24d49175-dc95-46d8-ad33-baa02b4c5cd5/uploadProfilePic?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMzczMWQyYmQ2ZjJmY2YxMjllNGRmZmZmNDA1NTc5N2RiZTljYWNjYzI1NTc2ZjYyNTYxMjJiZjBhYzM0NTlmIn0.x4kBC19Z2jaU-DhnlqTJ5M000B0BhC454jhFl0GDc4jB6pAm9GT7wQWbS4dzwBSP6V-W5E4BbFO8A_DpbKbDng' -F "image=@/Users/jtandalai/Downloads/Fresh_Brothers_65x35.png"
+curl -i -XPOST 'localhost:4568/campaigns/24d49175-dc95-46d8-ad33-baa02b4c5cd5/uploadProfilePic?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMzczMWQyYmQ2ZjJmY2YxMjllNGRmZmZmNDA1NTc5N2RiZTljYWNjYzI1NTc2ZjYyNTYxMjJiZjBhYzM0NTlmIn0.x4kBC19Z2jaU-DhnlqTJ5M000B0BhC454jhFl0GDc4jB6pAm9GT7wQWbS4dzwBSP6V-W5E4BbFO8A_DpbKbDng' -F "image=@/Users/jtandalai/Downloads/Fresh_Brothers_65x35.png"
 
 Res:
 TTP/1.1 200 OK
