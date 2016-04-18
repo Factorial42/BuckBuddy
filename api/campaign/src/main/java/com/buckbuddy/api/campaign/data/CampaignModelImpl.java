@@ -84,7 +84,7 @@ public class CampaignModelImpl implements CampaignModel {
 
 		Map<String, Object> userResponse;
 		try {
-			userResponse = rethinkDB.table("campaign").get("campaignId")
+			userResponse = rethinkDB.table("campaign").get(campaign.getCampaignId())
 					.replace(rethinkDB.expr(campaign)).run(conn);
 			return userResponse;
 		} catch (Exception e) {

@@ -115,7 +115,7 @@ public class UserModelImpl implements UserModel {
 
 		Map<String, Object> userResponse;
 		try {
-			userResponse = rethinkDB.table("user").get("userId")
+			userResponse = rethinkDB.table("user").get(user.getUserId())
 					.replace(rethinkDB.expr(user)).run(conn);
 			return userResponse;
 		} catch (Exception e) {

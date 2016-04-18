@@ -180,7 +180,7 @@ public class CampaignRouter {
 					try {
 						Campaign campaign = mapper.readValue(req.body(),
 								Campaign.class);
-						if (campaign.getCampaignId() != null) {
+						if (campaign.getCampaignId() == null || campaign.getCampaignId().isEmpty()) {
 							res.status(403);
 							res.type("application/json");
 							return mapper.createObjectNode().put("error",
