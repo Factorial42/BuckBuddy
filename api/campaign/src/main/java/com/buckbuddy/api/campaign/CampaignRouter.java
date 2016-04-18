@@ -64,7 +64,7 @@ public class CampaignRouter {
 	 * Initialize crud routes.
 	 */
 	public void initializeCRUDRoutes() {
-		post("/campaigns/",
+		post("/campaigns",
 				(req, res) -> {
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					try {
