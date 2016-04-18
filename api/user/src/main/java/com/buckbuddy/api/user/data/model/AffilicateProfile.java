@@ -5,10 +5,13 @@ package com.buckbuddy.api.user.data.model;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * @author jtandalai
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AffilicateProfile {
 	
 	private UUID affiliateId;

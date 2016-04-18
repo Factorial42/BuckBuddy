@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import com.buckbuddy.api.user.data.UserDataException;
 import com.buckbuddy.api.user.data.UserModel;
 import com.buckbuddy.api.user.data.UserModelImpl;
-import com.buckbuddy.api.user.data.model.Stripe;
 import com.buckbuddy.api.user.data.model.User;
 import com.buckbuddy.core.BuckBuddyResponse;
 import com.buckbuddy.core.exceptions.BuckBuddyException;

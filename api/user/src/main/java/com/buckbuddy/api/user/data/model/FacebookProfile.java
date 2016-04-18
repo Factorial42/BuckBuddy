@@ -3,10 +3,13 @@
  */
 package com.buckbuddy.api.user.data.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * @author jtandalai
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FacebookProfile {
 
 	private String name;

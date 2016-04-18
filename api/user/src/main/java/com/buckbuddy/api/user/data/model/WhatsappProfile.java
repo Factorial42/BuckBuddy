@@ -1,5 +1,8 @@
 package com.buckbuddy.api.user.data.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WhatsappProfile {
 
 	private String number;
