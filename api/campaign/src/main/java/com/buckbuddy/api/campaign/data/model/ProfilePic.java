@@ -13,13 +13,13 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_EMPTY)
 public class ProfilePic {
 
-	private Integer sequence;
+	private Long sequence;
 	private String url;
 
 	/**
 	 * @return the sequence
 	 */
-	public Integer getSequence() {
+	public Long getSequence() {
 		return sequence;
 	}
 
@@ -27,7 +27,7 @@ public class ProfilePic {
 	 * @param sequence
 	 *            the sequence to set
 	 */
-	public void setSequence(Integer sequence) {
+	public void setSequence(Long sequence) {
 		this.sequence = sequence;
 	}
 
