@@ -4,15 +4,19 @@
 package com.buckbuddy.api.user.data;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.buckbuddy.api.user.data.model.User;
+import com.buckbuddy.api.user.data.model.UserSlug;
 import com.buckbuddy.core.exceptions.BuckBuddyException;
 import com.buckbuddy.core.security.SecurityUtil;
+import com.buckbuddy.core.utils.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rethinkdb.RethinkDB;
@@ -77,17 +81,75 @@ public class UserModelImpl implements UserModel {
 			throw new UserDataException(UserDataException.SECURITY_EXCEPTION);
 		}
 		user.setCreatedAt(OffsetDateTime.now());
-		user.setLastUpdatedAt(OffsetDateTime.now());
+		user.setLastUpdatedAt(user.getCreatedAt());
 
 		// mark the user active for now. in future mark a user active only after
 		// a email verification
 		user.setActive(Boolean.TRUE);
 
-		Map<String, Object> userResponse;
+		Map<String, Object> userResponse, userWithSlugResponse, userSlugResponse;
 
 		try {
 			userResponse = rethinkDB.table("user").insert(rethinkDB.expr(user))
 					.run(conn);
+
+			if (userResponse != null
+					&& userResponse.get("inserted") instanceof Long
+					&& ((Long) userResponse.get("inserted")) > 0) {
+				// if user is saved successfully, create user slug
+				UserSlug userSlug = new UserSlug();
+				userSlug.setCreatedAt(user.getCreatedAt());
+				userSlug.setLastUpdatedAt(user.getCreatedAt());
+				userSlug.setUserId(user.getUserId());
+				List<String> slugList = new ArrayList<>();
+				if (user.getFirstName() != null
+						&& !user.getFirstName().isEmpty()
+						&& user.getLastName() != null
+						&& !user.getLastName().isEmpty()) {
+					slugList.add(user.getFirstName());
+					slugList.add(user.getLastName());
+				} else {
+					slugList.add(user.getName());
+				}
+
+				String userSlugString = null;
+				boolean success = false;
+				for (int i = 0; i < 5; i++) {
+					// try a max of 5 times saving slug with current timestamp
+					// if it's already taken
+					slugList.add(String.valueOf(OffsetDateTime.now()
+							.toEpochSecond()));
+					userSlugString = StringUtils.slugify(slugList);
+					userSlug.setUserSlug(userSlugString);
+					userSlugResponse = rethinkDB.table("userSlug")
+							.insert(rethinkDB.expr(userSlug)).run(conn);
+					if (userSlugResponse != null
+							&& userSlugResponse.get("inserted") instanceof Long
+							&& ((Long) userSlugResponse.get("inserted")) > 0) {
+						success = true;
+						break;
+					} else {
+						slugList.remove(slugList.size() - 1);
+					}
+				}
+				if (!success) {
+					LOG.error("Could not create user slug. Too many conflicts. Try again later");
+				} else {
+					// save user object with slug info
+					Map<String, Object> userWithSlug = new HashMap<>();
+					userWithSlug.put("userSlug", userSlugString);
+					userWithSlugResponse = rethinkDB.table("user")
+							.get(user.getUserId())
+							.update(rethinkDB.expr(userWithSlug)).run(conn);
+					if (userWithSlugResponse == null
+							&& userResponse.get("errors") instanceof Long
+							&& ((Long) userResponse.get("errors")) > 0) {
+						LOG.error(
+								"Error while saving user object with slug info",
+								userResponse.get("first_error"));
+					}
+				}
+			}
 			return userResponse;
 		} catch (Exception e) {
 			LOG.error(UserDataException.DB_EXCEPTION, e);
@@ -146,8 +208,8 @@ public class UserModelImpl implements UserModel {
 				user.put("password", SecurityUtil.encrypt(
 						(String) user.get("password"), SecurityUtil.SHA_256));
 			}
-			userResponse = rethinkDB.table("user").get(user.get("userId")).update(rethinkDB.expr(user))
-					.run(conn);
+			userResponse = rethinkDB.table("user").get(user.get("userId"))
+					.update(rethinkDB.expr(user)).run(conn);
 			return userResponse;
 		} catch (Exception e) {
 			LOG.error(UserDataException.DB_EXCEPTION, e);

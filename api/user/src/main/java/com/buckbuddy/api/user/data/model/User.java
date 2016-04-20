@@ -21,6 +21,7 @@ public class User {
 
 	private String userId;
 	private String token;
+	private String userSlug;
 	private Boolean authenticated;
 	private OffsetDateTime createdAt;
 	private OffsetDateTime lastUpdatedAt;
@@ -75,6 +76,20 @@ public class User {
 	 */
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	/**
+	 * @return the userSlug
+	 */
+	public String getUserSlug() {
+		return userSlug;
+	}
+
+	/**
+	 * @param userSlug the userSlug to set
+	 */
+	public void setUserSlug(String userSlug) {
+		this.userSlug = userSlug;
 	}
 
 	/**
@@ -387,21 +402,24 @@ public class User {
 		return user;
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((active == null) ? 0 : active.hashCode());
 		result = prime
 				* result
 				+ ((affiliateProfile == null) ? 0 : affiliateProfile.hashCode());
+		result = prime * result
+				+ ((authenticated == null) ? 0 : authenticated.hashCode());
 		result = prime * result + ((country == null) ? 0 : country.hashCode());
 		result = prime * result
 				+ ((createdAt == null) ? 0 : createdAt.hashCode());
+		result = prime * result
+				+ ((currency == null) ? 0 : currency.hashCode());
 		result = prime * result
 				+ ((currencyString == null) ? 0 : currencyString.hashCode());
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
@@ -413,6 +431,7 @@ public class User {
 				+ ((lastUpdatedAt == null) ? 0 : lastUpdatedAt.hashCode());
 		result = prime * result
 				+ ((middleName == null) ? 0 : middleName.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
 				+ ((password == null) ? 0 : password.hashCode());
 		result = prime * result
@@ -420,14 +439,17 @@ public class User {
 		result = prime * result
 				+ ((profilePic == null) ? 0 : profilePic.hashCode());
 		result = prime * result
+				+ ((s3handle == null) ? 0 : s3handle.hashCode());
+		result = prime * result
 				+ ((socialProfiles == null) ? 0 : socialProfiles.hashCode());
+		result = prime * result + ((token == null) ? 0 : token.hashCode());
 		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+		result = prime * result
+				+ ((userSlug == null) ? 0 : userSlug.hashCode());
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -442,11 +464,25 @@ public class User {
 			return false;
 		}
 		User other = (User) obj;
+		if (active == null) {
+			if (other.active != null) {
+				return false;
+			}
+		} else if (!active.equals(other.active)) {
+			return false;
+		}
 		if (affiliateProfile == null) {
 			if (other.affiliateProfile != null) {
 				return false;
 			}
 		} else if (!affiliateProfile.equals(other.affiliateProfile)) {
+			return false;
+		}
+		if (authenticated == null) {
+			if (other.authenticated != null) {
+				return false;
+			}
+		} else if (!authenticated.equals(other.authenticated)) {
 			return false;
 		}
 		if (country == null) {
@@ -461,6 +497,13 @@ public class User {
 				return false;
 			}
 		} else if (!createdAt.equals(other.createdAt)) {
+			return false;
+		}
+		if (currency == null) {
+			if (other.currency != null) {
+				return false;
+			}
+		} else if (!currency.equals(other.currency)) {
 			return false;
 		}
 		if (currencyString == null) {
@@ -505,6 +548,13 @@ public class User {
 		} else if (!middleName.equals(other.middleName)) {
 			return false;
 		}
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
 		if (password == null) {
 			if (other.password != null) {
 				return false;
@@ -526,11 +576,25 @@ public class User {
 		} else if (!profilePic.equals(other.profilePic)) {
 			return false;
 		}
+		if (s3handle == null) {
+			if (other.s3handle != null) {
+				return false;
+			}
+		} else if (!s3handle.equals(other.s3handle)) {
+			return false;
+		}
 		if (socialProfiles == null) {
 			if (other.socialProfiles != null) {
 				return false;
 			}
 		} else if (!socialProfiles.equals(other.socialProfiles)) {
+			return false;
+		}
+		if (token == null) {
+			if (other.token != null) {
+				return false;
+			}
+		} else if (!token.equals(other.token)) {
 			return false;
 		}
 		if (userId == null) {
@@ -540,25 +604,32 @@ public class User {
 		} else if (!userId.equals(other.userId)) {
 			return false;
 		}
+		if (userSlug == null) {
+			if (other.userSlug != null) {
+				return false;
+			}
+		} else if (!userSlug.equals(other.userSlug)) {
+			return false;
+		}
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "User [userId=" + userId + ", createdAt=" + createdAt
-				+ ", lastUpdatedAt=" + lastUpdatedAt + ", firstName="
-				+ firstName + ", middleName=" + middleName + ", lastName="
-				+ lastName + ", email=" + email + ", password=" + password
-				+ ", country=" + country + ", currency=" + currency
-				+ ", currencyString=" + currencyString + ", profilePic="
+		return "User [userId=" + userId + ", token=" + token + ", userSlug="
+				+ userSlug + ", authenticated=" + authenticated
+				+ ", createdAt=" + createdAt + ", lastUpdatedAt="
+				+ lastUpdatedAt + ", name=" + name + ", firstName=" + firstName
+				+ ", middleName=" + middleName + ", lastName=" + lastName
+				+ ", email=" + email + ", password=" + password + ", country="
+				+ country + ", currency=" + currency + ", currencyString="
+				+ currencyString + ", s3handle=" + s3handle + ", profilePic="
 				+ profilePic + ", affiliateProfile=" + affiliateProfile
 				+ ", paymentProfiles=" + paymentProfiles + ", socialProfiles="
-				+ socialProfiles + "]";
+				+ socialProfiles + ", active=" + active + "]";
 	}
 
 	/**

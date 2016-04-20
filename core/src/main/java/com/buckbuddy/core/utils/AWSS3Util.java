@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
@@ -33,8 +34,8 @@ public class AWSS3Util {
 	public static Boolean upload(String bucketName, String keyName,
 			InputStream inputStream, String metadataString) {
 		try {
-			ObjectMetadata metadata=new ObjectMetadata();
-			if(metadataString!=null && !metadataString.isEmpty()) {
+			ObjectMetadata metadata = new ObjectMetadata();
+			if (metadataString != null && !metadataString.isEmpty()) {
 				metadata.setContentType(metadataString);
 			}
 			PutObjectResult result = s3client.putObject(new PutObjectRequest(
@@ -42,6 +43,17 @@ public class AWSS3Util {
 			return true;
 		} catch (Exception e) {
 			LOG.error("Error in uploading file to s3", e);
+			return false;
+		}
+	}
+
+	public static Boolean delete(String bucketName, String keyName) {
+		try {
+			s3client.deleteObject(new DeleteObjectRequest(bucketName, keyName));
+			return true;
+		} catch (Exception e) {
+			LOG.error("Error in deleting file bucket:{} key:{} to s3",
+					bucketName, keyName, e);
 			return false;
 		}
 	}

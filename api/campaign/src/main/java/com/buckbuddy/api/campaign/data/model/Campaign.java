@@ -8,7 +8,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -21,17 +20,22 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class Campaign {
 
 	private String userId;
+	private String userSlug;
+	private String campaignSlug;
 	private String campaignId;
-	private AtomicInteger counter;
 	private OffsetDateTime createdAt;
 	private OffsetDateTime lastUpdatedAt;
+	private OffsetDateTime startedAt;
+	private OffsetDateTime endedAt;
 	private String name;
 	private String description;
 	private String cause;
 	private BigDecimal amount;
 	private Currency currency;
 	private String currencyString;
+	private Long contributorsCount;
 	private Boolean active;
+	private Long days;
 	private List<ProfilePic> profilePics;
 
 	private CampaignNetworks campaignNetworks;
@@ -49,6 +53,36 @@ public class Campaign {
 	 */
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	/**
+	 * @return the userSlug
+	 */
+	public String getUserSlug() {
+		return userSlug;
+	}
+
+	/**
+	 * @param userSlug
+	 *            the userSlug to set
+	 */
+	public void setUserSlug(String userSlug) {
+		this.userSlug = userSlug;
+	}
+
+	/**
+	 * @return the campaignURLSlug
+	 */
+	public String getCampaignURLSlug() {
+		return campaignSlug;
+	}
+
+	/**
+	 * @param campaignURLSlug
+	 *            the campaignURLSlug to set
+	 */
+	public void setCampaignURLSlug(String campaignURLSlug) {
+		this.campaignSlug = campaignURLSlug;
 	}
 
 	/**
@@ -97,18 +131,48 @@ public class Campaign {
 	}
 
 	/**
-	 * @return the counter
+	 * @return the campaignSlug
 	 */
-	public AtomicInteger getCounter() {
-		return counter;
+	public String getCampaignSlug() {
+		return campaignSlug;
 	}
 
 	/**
-	 * @param counter
-	 *            the counter to set
+	 * @param campaignSlug
+	 *            the campaignSlug to set
 	 */
-	public void setCounter(AtomicInteger counter) {
-		this.counter = counter;
+	public void setCampaignSlug(String campaignSlug) {
+		this.campaignSlug = campaignSlug;
+	}
+
+	/**
+	 * @return the startedAt
+	 */
+	public OffsetDateTime getStartedAt() {
+		return startedAt;
+	}
+
+	/**
+	 * @param startedAt
+	 *            the startedAt to set
+	 */
+	public void setStartedAt(OffsetDateTime startedAt) {
+		this.startedAt = startedAt;
+	}
+
+	/**
+	 * @return the endedAt
+	 */
+	public OffsetDateTime getEndedAt() {
+		return endedAt;
+	}
+
+	/**
+	 * @param endedAt
+	 *            the endedAt to set
+	 */
+	public void setEndedAt(OffsetDateTime endedAt) {
+		this.endedAt = endedAt;
 	}
 
 	/**
@@ -209,10 +273,33 @@ public class Campaign {
 	}
 
 	/**
+	 * @param active
+	 *            the active to set
+	 */
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the days
+	 */
+	public Long getDays() {
+		return days;
+	}
+
+	/**
+	 * @param days
+	 *            the days to set
+	 */
+	public void setDays(Long days) {
+		this.days = days;
+	}
+
+	/**
 	 * @return the profilePics
 	 */
 	public List<ProfilePic> getProfilePics() {
-		return profilePics == null ? new ArrayList<ProfilePic>() : profilePics;
+		return profilePics;
 	}
 
 	/**
@@ -230,11 +317,18 @@ public class Campaign {
 	}
 
 	/**
-	 * @param active
-	 *            the active to set
+	 * @return the contributorsCount
 	 */
-	public void setActive(Boolean active) {
-		this.active = active;
+	public Long getContributorsCount() {
+		return contributorsCount;
+	}
+
+	/**
+	 * @param contributorsCount
+	 *            the contributorsCount to set
+	 */
+	public void setContributorsCount(Long contributorsCount) {
+		this.contributorsCount = contributorsCount;
 	}
 
 	/**
@@ -250,6 +344,224 @@ public class Campaign {
 	 */
 	public void setCampaignNetworks(CampaignNetworks campaignNetworks) {
 		this.campaignNetworks = campaignNetworks;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Campaign [userId=" + userId + ", userSlug=" + userSlug
+				+ ", campaignSlug=" + campaignSlug + ", campaignId="
+				+ campaignId + ", createdAt=" + createdAt + ", lastUpdatedAt="
+				+ lastUpdatedAt + ", startedAt=" + startedAt + ", endedAt="
+				+ endedAt + ", name=" + name + ", description=" + description
+				+ ", cause=" + cause + ", amount=" + amount + ", currency="
+				+ currency + ", currencyString=" + currencyString
+				+ ", contributorsCount=" + contributorsCount + ", active="
+				+ active + ", days=" + days + ", profilePics=" + profilePics
+				+ ", campaignNetworks=" + campaignNetworks + "]";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((active == null) ? 0 : active.hashCode());
+		result = prime * result + ((amount == null) ? 0 : amount.hashCode());
+		result = prime * result
+				+ ((campaignId == null) ? 0 : campaignId.hashCode());
+		result = prime
+				* result
+				+ ((campaignNetworks == null) ? 0 : campaignNetworks.hashCode());
+		result = prime * result
+				+ ((campaignSlug == null) ? 0 : campaignSlug.hashCode());
+		result = prime * result + ((cause == null) ? 0 : cause.hashCode());
+		result = prime
+				* result
+				+ ((contributorsCount == null) ? 0 : contributorsCount
+						.hashCode());
+		result = prime * result
+				+ ((createdAt == null) ? 0 : createdAt.hashCode());
+		result = prime * result
+				+ ((currency == null) ? 0 : currency.hashCode());
+		result = prime * result
+				+ ((currencyString == null) ? 0 : currencyString.hashCode());
+		result = prime * result + ((days == null) ? 0 : days.hashCode());
+		result = prime * result
+				+ ((description == null) ? 0 : description.hashCode());
+		result = prime * result + ((endedAt == null) ? 0 : endedAt.hashCode());
+		result = prime * result
+				+ ((lastUpdatedAt == null) ? 0 : lastUpdatedAt.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result
+				+ ((profilePics == null) ? 0 : profilePics.hashCode());
+		result = prime * result
+				+ ((startedAt == null) ? 0 : startedAt.hashCode());
+		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+		result = prime * result
+				+ ((userSlug == null) ? 0 : userSlug.hashCode());
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Campaign)) {
+			return false;
+		}
+		Campaign other = (Campaign) obj;
+		if (active == null) {
+			if (other.active != null) {
+				return false;
+			}
+		} else if (!active.equals(other.active)) {
+			return false;
+		}
+		if (amount == null) {
+			if (other.amount != null) {
+				return false;
+			}
+		} else if (!amount.equals(other.amount)) {
+			return false;
+		}
+		if (campaignId == null) {
+			if (other.campaignId != null) {
+				return false;
+			}
+		} else if (!campaignId.equals(other.campaignId)) {
+			return false;
+		}
+		if (campaignNetworks == null) {
+			if (other.campaignNetworks != null) {
+				return false;
+			}
+		} else if (!campaignNetworks.equals(other.campaignNetworks)) {
+			return false;
+		}
+		if (campaignSlug == null) {
+			if (other.campaignSlug != null) {
+				return false;
+			}
+		} else if (!campaignSlug.equals(other.campaignSlug)) {
+			return false;
+		}
+		if (cause == null) {
+			if (other.cause != null) {
+				return false;
+			}
+		} else if (!cause.equals(other.cause)) {
+			return false;
+		}
+		if (contributorsCount == null) {
+			if (other.contributorsCount != null) {
+				return false;
+			}
+		} else if (!contributorsCount.equals(other.contributorsCount)) {
+			return false;
+		}
+		if (createdAt == null) {
+			if (other.createdAt != null) {
+				return false;
+			}
+		} else if (!createdAt.equals(other.createdAt)) {
+			return false;
+		}
+		if (currency == null) {
+			if (other.currency != null) {
+				return false;
+			}
+		} else if (!currency.equals(other.currency)) {
+			return false;
+		}
+		if (currencyString == null) {
+			if (other.currencyString != null) {
+				return false;
+			}
+		} else if (!currencyString.equals(other.currencyString)) {
+			return false;
+		}
+		if (days == null) {
+			if (other.days != null) {
+				return false;
+			}
+		} else if (!days.equals(other.days)) {
+			return false;
+		}
+		if (description == null) {
+			if (other.description != null) {
+				return false;
+			}
+		} else if (!description.equals(other.description)) {
+			return false;
+		}
+		if (endedAt == null) {
+			if (other.endedAt != null) {
+				return false;
+			}
+		} else if (!endedAt.equals(other.endedAt)) {
+			return false;
+		}
+		if (lastUpdatedAt == null) {
+			if (other.lastUpdatedAt != null) {
+				return false;
+			}
+		} else if (!lastUpdatedAt.equals(other.lastUpdatedAt)) {
+			return false;
+		}
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		if (profilePics == null) {
+			if (other.profilePics != null) {
+				return false;
+			}
+		} else if (!profilePics.equals(other.profilePics)) {
+			return false;
+		}
+		if (startedAt == null) {
+			if (other.startedAt != null) {
+				return false;
+			}
+		} else if (!startedAt.equals(other.startedAt)) {
+			return false;
+		}
+		if (userId == null) {
+			if (other.userId != null) {
+				return false;
+			}
+		} else if (!userId.equals(other.userId)) {
+			return false;
+		}
+		if (userSlug == null) {
+			if (other.userSlug != null) {
+				return false;
+			}
+		} else if (!userSlug.equals(other.userSlug)) {
+			return false;
+		}
+		return true;
 	}
 
 	public Campaign() {

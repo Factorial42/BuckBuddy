@@ -86,7 +86,12 @@ public interface CampaignModel {
 
 	public Campaign getByUserId(String userId) throws CampaignDataException;
 
-	public Map<String, Object> appendToProfilePics(String campaignId, String profilePic, Integer sequence)
+	public Boolean checkIfSlugExists(String userId, String slug)
 			throws CampaignDataException;
 
+	public Map<String, Object> activate(Map<String, Object> campaignMap)
+			throws CampaignDataException;
+
+	public Map<String, Object> deActivate(Map<String, Object> campaignMap)
+			throws CampaignDataException;
 }

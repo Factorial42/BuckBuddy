@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class ProfilePic {
 
 	private Long sequence;
+	private String profilePicId;
 	private String url;
 
 	/**
@@ -32,6 +33,20 @@ public class ProfilePic {
 	}
 
 	/**
+	 * @return the profilePicID
+	 */
+	public String getProfilePicId() {
+		return profilePicId;
+	}
+
+	/**
+	 * @param profilePicID the profilePicID to set
+	 */
+	public void setProfilePicId(String profilePicId) {
+		this.profilePicId = profilePicId;
+	}
+
+	/**
 	 * @return the url
 	 */
 	public String getUrl() {
@@ -46,9 +61,7 @@ public class ProfilePic {
 		this.url = url;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -56,14 +69,14 @@ public class ProfilePic {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
+				+ ((profilePicId == null) ? 0 : profilePicId.hashCode());
+		result = prime * result
 				+ ((sequence == null) ? 0 : sequence.hashCode());
 		result = prime * result + ((url == null) ? 0 : url.hashCode());
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -78,6 +91,13 @@ public class ProfilePic {
 			return false;
 		}
 		ProfilePic other = (ProfilePic) obj;
+		if (profilePicId == null) {
+			if (other.profilePicId != null) {
+				return false;
+			}
+		} else if (!profilePicId.equals(other.profilePicId)) {
+			return false;
+		}
 		if (sequence == null) {
 			if (other.sequence != null) {
 				return false;
@@ -95,14 +115,13 @@ public class ProfilePic {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "ProfilePic [sequence=" + sequence + ", url=" + url + "]";
+		return "ProfilePic [sequence=" + sequence + ", profilePicID="
+				+ profilePicId + ", url=" + url + "]";
 	}
 
 	/**
