@@ -94,4 +94,7 @@ public interface CampaignModel {
 
 	public Map<String, Object> deActivate(Map<String, Object> campaignMap)
 			throws CampaignDataException;
+
+	public Campaign getByCampaignSlug(String campaignSlug)
+			throws CampaignDataException;
 }

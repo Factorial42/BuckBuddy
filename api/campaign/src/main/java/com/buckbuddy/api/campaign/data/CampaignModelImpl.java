@@ -239,6 +239,40 @@ public class CampaignModelImpl implements CampaignModel {
 	}
 
 	@Override
+	public Campaign getByCampaignSlug(String campaignSlug) throws CampaignDataException {
+		Map<String, Object> campaignResponse = new HashMap<>();
+		try {
+			Cursor cursor = rethinkDB.table("campaign")
+					.filter(rethinkDB.hashMap("campaignSlug", campaignSlug)).run(conn);
+
+			if (cursor.hasNext()) {
+				campaignResponse = (Map<String, Object>) cursor.next();
+				if (campaignResponse.get("startedAt") != null) {
+					if (campaignResponse.get("endedAt") != null) {
+						campaignResponse.put("days", ChronoUnit.DAYS.between(
+								(OffsetDateTime) campaignResponse
+										.get("startedAt"),
+								(OffsetDateTime) campaignResponse
+										.get("endedAt")));
+					} else {
+						campaignResponse.put("days",
+								ChronoUnit.DAYS.between(
+										(OffsetDateTime) campaignResponse
+												.get("startedAt"),
+										OffsetDateTime.now()));
+					}
+				} else {
+					campaignResponse.put("days", 0);
+				}
+			}
+			return mapper.convertValue(campaignResponse, Campaign.class);
+		} catch (Exception e) {
+			LOG.error(CampaignDataException.DB_EXCEPTION, e);
+			throw new CampaignDataException(CampaignDataException.DB_EXCEPTION);
+		}
+	}
+
+	@Override
 	public Map<String, Object> delete(Campaign campaign)
 			throws CampaignDataException {
 		Map<String, Object> campaignResponse;

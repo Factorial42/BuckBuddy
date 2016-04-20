@@ -159,8 +159,50 @@ public class CampaignRouter {
 		get("/campaigns/:campaignId",
 				(req, res) -> {
 					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token = (req.queryParams("token"));
+						String userId = token!=null&&!token.isEmpty()?JJWTUtil.getSubject(token):"";
+						if (userId == null || userId.isEmpty()) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper.createObjectNode()
+									.put("message", "Token as a param is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
 						Campaign campaign = campaignModelImpl.getById(req
 								.params(":campaignId"));
+						if (campaign != null) {
+							res.status(200);
+							res.type("application/json");
+						} else {
+							res.status(404);
+							res.type("application/json");
+						}
+						return mapper
+								.writeValueAsString(campaign != null ? campaign
+										: new Campaign());
+					} catch (CampaignDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								CampaignDataException.UNKNOWN);
+					}
+				});
+		get("/campaigns/bySlug/:campaignSlug",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token = (req.queryParams("token"));
+						String userId = token!=null&&!token.isEmpty()?JJWTUtil.getSubject(token):"";
+						if (userId == null || userId.isEmpty()) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper.createObjectNode()
+									.put("message", "Token as a param is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						Campaign campaign = campaignModelImpl.getByCampaignSlug(req
+								.params(":campaignSlug"));
 						if (campaign != null) {
 							res.status(200);
 							res.type("application/json");

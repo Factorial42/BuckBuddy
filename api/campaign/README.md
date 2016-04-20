@@ -42,6 +42,19 @@ Server: Jetty(9.3.2.v20150730)
 
 {"data":{"userId":"a3731d2bd6f2fcf129e4dffff4055797dbe9caccc25576f6256122bf0ac3459f","campaignId":"c7e154ff-839c-4bab-a2e7-b988654d384d","createdAt":1461006282.188,"lastUpdatedAt":1461006282.191,"name":"testcampaign","amount":12.12,"contributorsCount":0,"active":false,"days":0,"campaignURLSlug":"testcampaign-1461143741"}}
 
+## get campaign by slug
+Req:
+curl -i -XGET 'localhost:4568/campaigns/bySlug/testcampaign-1461143741?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA'
+
+Res:
+HTTP/1.1 200 OK
+Date: Wed, 20 Apr 2016 21:41:13 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"userId":"ec67978322e5fbd7604e8db2ad0e89ab1fc4b7dee0a9a9655fb662b8ae647e71","userSlug":"test-user-1461137733","campaignSlug":"testcampaign-1461143741","campaignId":"4219321d-02a8-46f7-83d4-82bb3b85a639","createdAt":1461143741.520000000,"lastUpdatedAt":1461171228.924000000,"name":"testcampaign","amount":12.13,"contributorsCount":0,"active":false,"days":0,"campaignURLSlug":"testcampaign-1461143741"}
+
 ## delete campaign
 Req:
 curl -i -XDELETE 'localhost:4568/campaigns/24d49175-dc95-46d8-ad33-baa02b4c5cd5' 
