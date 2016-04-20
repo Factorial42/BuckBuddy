@@ -30,7 +30,7 @@
 
    ```   
    cd ../campaign
-   java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n -jar target/campaign-1.0.jar
+   java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8001,suspend=n -jar target/campaign-1.0.jar
    ```
-   Now campaign Spark-Java app will be listening on port 4568 for API calls and 8000 for remote debug connectors
+   Now campaign Spark-Java app will be listening on port 4568 for API calls and 8001 for remote debug connectors
    
