@@ -17,6 +17,7 @@
 		<spark.version>2.3</spark.version>
 		<slf4j-simple.version>1.7.21</slf4j-simple.version>
 		<buckbuddy.core.version>1.0</buckbuddy.core.version>
+		<spark.template.mustache.version>2.3</spark.template.mustache.version>
 	</properties>
 	<modules>
 		<module>admin</module>
@@ -80,6 +81,11 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>${slf4j-simple.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.sparkjava</groupId>
+		    <artifactId>spark-template-mustache</artifactId>
+		    <version>${spark.template.mustache.version}</version>
 		</dependency>
 	</dependencies>
 </project>

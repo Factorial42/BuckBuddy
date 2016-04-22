@@ -32,9 +32,14 @@ import com.buckbuddy.core.exceptions.BuckBuddyException;
 import com.buckbuddy.core.security.JJWTUtil;
 import com.buckbuddy.core.security.SecurityUtil;
 import com.buckbuddy.core.utils.AWSS3Util;
+import com.buckbuddy.core.utils.AWSSESUtil;
+import com.buckbuddy.core.utils.RESTClientUtil;
+import com.buckbuddy.core.utils.TemplateUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.restfb.types.User;
 
 public class CampaignRouter {
 
@@ -42,10 +47,13 @@ public class CampaignRouter {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(CampaignRouter.class);
 
+	private static final String USER_SERVICE_BASE_GET_USER = "http://localhost:4567/users/";
 	private static final String S3_BUCKET = "user.assets.dev.buckbuddy.com";
 
 	private static final String ASSETS_URL = "http://user.assets.dev.buckbuddy.com/";
 	private static final String CAMPAIGN_PROFILE_PIC_PREFIX = "campaign.pic";
+	private static final String EMAIL_REGISTRATION_TEMPLATE = "emails/registration.mustache";
+	private static final String FROM = "hi@buckbuddy.com";
 
 	/** The Constant mapper. */
 	private static final ObjectMapper mapper = new ObjectMapper()
@@ -70,6 +78,7 @@ public class CampaignRouter {
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					try {
 						String token = null;
+						User user = null;
 						Campaign campaign = mapper.readValue(req.body(),
 								Campaign.class);
 
@@ -84,7 +93,23 @@ public class CampaignRouter {
 							return mapper.writeValueAsString(buckbuddyResponse);
 						}
 						// Get user calling user service in future.
-
+						JsonNode userJson = RESTClientUtil.sendGET(
+								USER_SERVICE_BASE_GET_USER
+										+ campaign.getUserId(), null);
+						if (userJson != null) {
+							user = mapper.convertValue(userJson, User.class);
+							LOG.debug("Found user with Id:{}", user.getId());
+						} else {
+							res.status(401);
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"Could not find User. Either user service is down or user does not exists."));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						campaign.setUserName(user.getName());
 						Map<String, Object> response = campaignModelImpl
 								.create(campaign);
 						if (response != null
@@ -95,10 +120,11 @@ public class CampaignRouter {
 							res.status(201);
 							// generate token
 							Campaign campaignFromDB = campaignModelImpl
-									.getByUserId(campaign.getUserId());
+									.getByUserId(campaign.getUserId(), Boolean.FALSE);
 							buckbuddyResponse.setData(mapper.convertValue(
 									campaignFromDB, ObjectNode.class));
 							res.type("application/json");
+							
 							return mapper.writeValueAsString(buckbuddyResponse);
 						} else if (response != null
 								&& response.get("errors") instanceof Long
@@ -137,7 +163,33 @@ public class CampaignRouter {
 						String token = req.params(":token");
 						String userId = JJWTUtil.getSubject(token);
 						Campaign campaign = campaignModelImpl
-								.getByUserId(userId);
+								.getByUserId(userId, Boolean.FALSE);
+						if (campaign != null) {
+							res.status(200);
+							res.type("application/json");
+							buckbuddyResponse.setData(mapper.convertValue(
+									campaign, ObjectNode.class));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						} else {
+							res.status(404);
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+					} catch (CampaignDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								CampaignDataException.UNKNOWN);
+					}
+				});
+		get("/campaigns/byToken/:token/minified",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token = req.params(":token");
+						String userId = JJWTUtil.getSubject(token);
+						Campaign campaign = campaignModelImpl
+								.getByUserId(userId, Boolean.TRUE);
 						if (campaign != null) {
 							res.status(200);
 							res.type("application/json");
@@ -161,16 +213,52 @@ public class CampaignRouter {
 					try {
 						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 						String token = (req.queryParams("token"));
-						String userId = token!=null&&!token.isEmpty()?JJWTUtil.getSubject(token):"";
+						String userId = token != null && !token.isEmpty() ? JJWTUtil
+								.getSubject(token) : "";
 						if (userId == null || userId.isEmpty()) {
 							res.status(400);
-							buckbuddyResponse.setError(mapper.createObjectNode()
-									.put("message", "Token as a param is mandatory"));
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"Token as a param is mandatory"));
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
 						}
 						Campaign campaign = campaignModelImpl.getById(req
-								.params(":campaignId"));
+								.params(":campaignId"), Boolean.FALSE);
+						if (campaign != null) {
+							res.status(200);
+							res.type("application/json");
+						} else {
+							res.status(404);
+							res.type("application/json");
+						}
+						return mapper
+								.writeValueAsString(campaign != null ? campaign
+										: new Campaign());
+					} catch (CampaignDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								CampaignDataException.UNKNOWN);
+					}
+				});
+		get("/campaigns/:campaignId/minified",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token = (req.queryParams("token"));
+						String userId = token != null && !token.isEmpty() ? JJWTUtil
+								.getSubject(token) : "";
+						if (userId == null || userId.isEmpty()) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"Token as a param is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						Campaign campaign = campaignModelImpl.getById(req
+								.params(":campaignId"), Boolean.TRUE);
 						if (campaign != null) {
 							res.status(200);
 							res.type("application/json");
@@ -192,17 +280,31 @@ public class CampaignRouter {
 				(req, res) -> {
 					try {
 						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
-						String token = (req.queryParams("token"));
-						String userId = token!=null&&!token.isEmpty()?JJWTUtil.getSubject(token):"";
-						if (userId == null || userId.isEmpty()) {
-							res.status(400);
-							buckbuddyResponse.setError(mapper.createObjectNode()
-									.put("message", "Token as a param is mandatory"));
+						Campaign campaign = campaignModelImpl
+								.getByCampaignSlug(req.params(":campaignSlug"), Boolean.FALSE);
+						if (campaign != null) {
+							res.status(200);
 							res.type("application/json");
-							return mapper.writeValueAsString(buckbuddyResponse);
+						} else {
+							res.status(404);
+							res.type("application/json");
 						}
-						Campaign campaign = campaignModelImpl.getByCampaignSlug(req
-								.params(":campaignSlug"));
+						return mapper
+								.writeValueAsString(campaign != null ? campaign
+										: new Campaign());
+					} catch (CampaignDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								CampaignDataException.UNKNOWN);
+					}
+				});
+		get("/campaigns/bySlug/:campaignSlug/minified",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						Campaign campaign = campaignModelImpl
+								.getByCampaignSlug(req.params(":campaignSlug"), Boolean.TRUE);
 						if (campaign != null) {
 							res.status(200);
 							res.type("application/json");
@@ -239,7 +341,7 @@ public class CampaignRouter {
 								&& response.get("replaced") instanceof Long
 								&& ((Long) response.get("replaced")) > 0) {
 							campaign = campaignModelImpl.getById(campaign
-									.getCampaignId());
+									.getCampaignId(), Boolean.FALSE);
 
 							res.status(200);
 							res.type("application/json");
@@ -406,8 +508,7 @@ public class CampaignRouter {
 
 					String profilePicS3Path = userId + "/"
 							+ CAMPAIGN_PROFILE_PIC_PREFIX + "/"
-							+ campaignMap.get("campaignId") + "/"
-							+ fileName;
+							+ campaignMap.get("campaignId") + "/" + fileName;
 
 					String metadataString = "image/" + extension;
 					boolean success = AWSS3Util.upload(S3_BUCKET,
@@ -432,16 +533,19 @@ public class CampaignRouter {
 								profilePicS3Path, SecurityUtil.SHA_256));
 						profilePic.setSequence(sequence);
 
-						Campaign campaign = campaignModelImpl.getById(campaignId);
-						List<ProfilePic> profilePics = campaign.getProfilePics();
-						if(profilePics==null) {
+						Campaign campaign = campaignModelImpl
+								.getById(campaignId, Boolean.FALSE);
+						List<ProfilePic> profilePics = campaign
+								.getProfilePics();
+						if (profilePics == null) {
 							profilePics = new ArrayList<>();
 						}
 						profilePics.add(profilePic);
 
 						campaign.setProfilePics(profilePics);
-						campaignMap.put("profilePics", campaign.getProfilePics());
-						
+						campaignMap.put("profilePics",
+								campaign.getProfilePics());
+
 						Map<String, Object> updateResponse = campaignModelImpl
 								.updatePartial(campaignMap);
 						if (updateResponse != null
@@ -451,8 +555,7 @@ public class CampaignRouter {
 									"Updated campaign {} with s3 profile pic url {}",
 									campaignMap.get("campaignId"),
 									profilePic.getUrl());
-							campaign = campaignModelImpl
-									.getById(campaignId);
+							campaign = campaignModelImpl.getById(campaignId, Boolean.FALSE);
 
 							res.status(200);
 							res.type("application/json");
@@ -488,12 +591,12 @@ public class CampaignRouter {
 				(req, res) -> {
 
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
-					Map<String, Object> campaignMap=new HashMap<>();
+					Map<String, Object> campaignMap = new HashMap<>();
 					String campaignId = (req.params(":campaignId"));
 					String token = (req.queryParams("token"));
 					String profilePicId = (req.params(":profilePicId"));
 					String userId = JJWTUtil.getSubject(token);
-					
+
 					if (userId == null || userId.isEmpty()) {
 						res.status(400);
 						buckbuddyResponse.setError(mapper.createObjectNode()
@@ -504,43 +607,49 @@ public class CampaignRouter {
 
 					campaignMap.put("campaignId", campaignId);
 					campaignMap.put("userId", userId);
-					
-					Campaign campaign = campaignModelImpl
-							.getById(campaignId);
-					for(ProfilePic profilePic:campaign.getProfilePics()) {
-						if(profilePic.getProfilePicId().equals(profilePicId)) {
+
+					Campaign campaign = campaignModelImpl.getById(campaignId, Boolean.FALSE);
+					for (ProfilePic profilePic : campaign.getProfilePics()) {
+						if (profilePic.getProfilePicId().equals(profilePicId)) {
 							// remove from S3 and this list and persist
-							String s3PathToDelete = profilePic.getUrl().replace(ASSETS_URL, "");
-							Boolean success = AWSS3Util.delete(S3_BUCKET, s3PathToDelete);
-							if(success) {
+							String s3PathToDelete = profilePic.getUrl()
+									.replace(ASSETS_URL, "");
+							Boolean success = AWSS3Util.delete(S3_BUCKET,
+									s3PathToDelete);
+							if (success) {
 								// update in DB
 								campaign.getProfilePics().remove(profilePic);
-//								if(campaign.getProfilePics().size()==0) {
-//									campaign.setProfilePics(null);
-//								}
-								campaignMap.put("profilePics", campaign.getProfilePics());
-								
+								// if(campaign.getProfilePics().size()==0) {
+								// campaign.setProfilePics(null);
+								// }
+								campaignMap.put("profilePics",
+										campaign.getProfilePics());
+
 								Map<String, Object> updateResponse = campaignModelImpl
 										.updatePartial(campaignMap);
-								
+
 								if (updateResponse != null
 										&& updateResponse.get("replaced") instanceof Long
-										&& ((Long) updateResponse.get("replaced")) > 0) {
+										&& ((Long) updateResponse
+												.get("replaced")) > 0) {
 									LOG.info(
 											"Updated campaign {} with s3 profile pic url {}",
 											campaign.getCampaignId(),
 											profilePic.getUrl());
 									campaign = campaignModelImpl
-											.getById(campaignId);
+											.getById(campaignId, Boolean.FALSE);
 
 									res.status(200);
 									res.type("application/json");
-									buckbuddyResponse.setData(mapper.convertValue(
-											campaign, ObjectNode.class));
-									return mapper.writeValueAsString(buckbuddyResponse);
+									buckbuddyResponse.setData(mapper
+											.convertValue(campaign,
+													ObjectNode.class));
+									return mapper
+											.writeValueAsString(buckbuddyResponse);
 								} else if (updateResponse != null
 										&& updateResponse.get("skipped") instanceof Long
-										&& ((Long) updateResponse.get("skipped")) > 0) {
+										&& ((Long) updateResponse
+												.get("skipped")) > 0) {
 									res.status(404);
 									res.type("application/json");
 									buckbuddyResponse
@@ -548,7 +657,8 @@ public class CampaignRouter {
 													.createObjectNode()
 													.put("message",
 															"Could not remove deleted profile pic from campaign"));
-									return mapper.writeValueAsString(buckbuddyResponse);
+									return mapper
+											.writeValueAsString(buckbuddyResponse);
 								} else {
 									res.status(500);
 									res.type("application/json");
@@ -557,7 +667,8 @@ public class CampaignRouter {
 													.createObjectNode()
 													.put("message",
 															"Could not remove deleted profile pic from campaign"));
-									return mapper.writeValueAsString(buckbuddyResponse);
+									return mapper
+											.writeValueAsString(buckbuddyResponse);
 								}
 							}
 						}
@@ -565,7 +676,7 @@ public class CampaignRouter {
 					res.status(404);
 					res.type("application/json");
 					return mapper.writeValueAsString(buckbuddyResponse);
-				});				
+				});
 	}
 
 	private void initializeActivityRoutes() {

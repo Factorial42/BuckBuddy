@@ -69,9 +69,8 @@ public class CampaignModelImpl implements CampaignModel {
 		campaign.setLastUpdatedAt(campaign.getCreatedAt());
 		campaign.setContributorsCount(0L);
 
-		if (campaign.getActive() == null) {
-			campaign.setActive(Boolean.FALSE);
-		}
+		// mark active by default
+		campaign.setActive(Boolean.TRUE);
 
 		Map<String, Object> campaignResponse, campaignWithSlugResponse, campaignSlugResponse;
 		;
@@ -179,23 +178,34 @@ public class CampaignModelImpl implements CampaignModel {
 	}
 
 	@Override
-	public Campaign getById(String campaignId) throws CampaignDataException {
-		Map<String, Object> campaignResponse;
+	public Campaign getById(String campaignId, Boolean minified) throws CampaignDataException {
+		Map<String, Object> campaignResponse=null;
 		try {
-			campaignResponse = rethinkDB.table("campaign").get(campaignId)
-					.run(conn);
-			if (campaignResponse.get("startedAt") != null) {
-				if (campaignResponse.get("endedAt") != null) {
-					campaignResponse.put("days", ChronoUnit.DAYS.between(
-							(OffsetDateTime) campaignResponse.get("startedAt"),
-							(OffsetDateTime) campaignResponse.get("endedAt")));
+			if (!minified) {
+				campaignResponse = rethinkDB.table("campaign").get(campaignId)
+						.run(conn);
+
+				if (campaignResponse.get("startedAt") != null) {
+					if (campaignResponse.get("endedAt") != null) {
+						campaignResponse.put("days", ChronoUnit.DAYS.between(
+								(OffsetDateTime) campaignResponse
+										.get("startedAt"),
+								(OffsetDateTime) campaignResponse
+										.get("endedAt")));
+					} else {
+						campaignResponse.put("days",
+								ChronoUnit.DAYS.between(
+										(OffsetDateTime) campaignResponse
+												.get("startedAt"),
+										OffsetDateTime.now()));
+					}
 				} else {
-					campaignResponse.put("days", ChronoUnit.DAYS.between(
-							(OffsetDateTime) campaignResponse.get("startedAt"),
-							OffsetDateTime.now()));
+					campaignResponse.put("days", 0);
 				}
 			} else {
-				campaignResponse.put("days", 0);
+				campaignResponse = rethinkDB.table("campaign").get(campaignId)
+						.pluck("name", "description", "amount", "profilePics")
+						.run(conn);
 			}
 			return mapper.convertValue(campaignResponse, Campaign.class);
 		} catch (Exception e) {
@@ -205,30 +215,40 @@ public class CampaignModelImpl implements CampaignModel {
 	}
 
 	@Override
-	public Campaign getByUserId(String userId) throws CampaignDataException {
+	public Campaign getByUserId(String userId, Boolean minified) throws CampaignDataException {
 		Map<String, Object> campaignResponse = new HashMap<>();
 		try {
-			Cursor cursor = rethinkDB.table("campaign")
-					.filter(rethinkDB.hashMap("userId", userId)).run(conn);
+			Cursor cursor = null;
+
+			if (!minified) {
+				cursor = rethinkDB.table("campaign")
+						.filter(rethinkDB.hashMap("userId", userId)).run(conn);
+			} else {
+				cursor = rethinkDB.table("campaign")
+						.filter(rethinkDB.hashMap("userId", userId))
+						.pluck("name", "description", "amount", "profilePics")
+						.run(conn);
+			}
 
 			if (cursor.hasNext()) {
 				campaignResponse = (Map<String, Object>) cursor.next();
-				if (campaignResponse.get("startedAt") != null) {
-					if (campaignResponse.get("endedAt") != null) {
-						campaignResponse.put("days", ChronoUnit.DAYS.between(
-								(OffsetDateTime) campaignResponse
-										.get("startedAt"),
-								(OffsetDateTime) campaignResponse
-										.get("endedAt")));
+				if(minified) {
+					if (campaignResponse.get("startedAt") != null) {
+						if (campaignResponse.get("endedAt") != null) {
+							campaignResponse.put("days", ChronoUnit.DAYS
+									.between((OffsetDateTime) campaignResponse
+											.get("startedAt"),
+											(OffsetDateTime) campaignResponse
+													.get("endedAt")));
+						} else {
+							campaignResponse.put("days", ChronoUnit.DAYS
+									.between((OffsetDateTime) campaignResponse
+											.get("startedAt"), OffsetDateTime
+											.now()));
+						}
 					} else {
-						campaignResponse.put("days",
-								ChronoUnit.DAYS.between(
-										(OffsetDateTime) campaignResponse
-												.get("startedAt"),
-										OffsetDateTime.now()));
+						campaignResponse.put("days", 0);
 					}
-				} else {
-					campaignResponse.put("days", 0);
 				}
 			}
 			return mapper.convertValue(campaignResponse, Campaign.class);
@@ -239,30 +259,44 @@ public class CampaignModelImpl implements CampaignModel {
 	}
 
 	@Override
-	public Campaign getByCampaignSlug(String campaignSlug) throws CampaignDataException {
+	public Campaign getByCampaignSlug(String campaignSlug, Boolean minified) throws CampaignDataException {
 		Map<String, Object> campaignResponse = new HashMap<>();
 		try {
-			Cursor cursor = rethinkDB.table("campaign")
-					.filter(rethinkDB.hashMap("campaignSlug", campaignSlug)).run(conn);
+			Cursor cursor = null;
+			
+			if (!minified) {
+				cursor = rethinkDB
+						.table("campaign")
+						.filter(rethinkDB.hashMap("campaignSlug", campaignSlug))
+						.run(conn);
+			} else {
+				cursor = rethinkDB
+						.table("campaign")
+						.filter(rethinkDB.hashMap("campaignSlug", campaignSlug))
+						.pluck("name", "description", "amount", "profilePics")
+						.run(conn);
+			}
 
 			if (cursor.hasNext()) {
 				campaignResponse = (Map<String, Object>) cursor.next();
-				if (campaignResponse.get("startedAt") != null) {
-					if (campaignResponse.get("endedAt") != null) {
-						campaignResponse.put("days", ChronoUnit.DAYS.between(
-								(OffsetDateTime) campaignResponse
-										.get("startedAt"),
-								(OffsetDateTime) campaignResponse
-										.get("endedAt")));
+				if(minified) {
+					if (campaignResponse.get("startedAt") != null) {
+						if (campaignResponse.get("endedAt") != null) {
+							campaignResponse.put("days", ChronoUnit.DAYS.between(
+									(OffsetDateTime) campaignResponse
+											.get("startedAt"),
+									(OffsetDateTime) campaignResponse
+											.get("endedAt")));
+						} else {
+							campaignResponse.put("days",
+									ChronoUnit.DAYS.between(
+											(OffsetDateTime) campaignResponse
+													.get("startedAt"),
+											OffsetDateTime.now()));
+						}
 					} else {
-						campaignResponse.put("days",
-								ChronoUnit.DAYS.between(
-										(OffsetDateTime) campaignResponse
-												.get("startedAt"),
-										OffsetDateTime.now()));
+						campaignResponse.put("days", 0);
 					}
-				} else {
-					campaignResponse.put("days", 0);
 				}
 			}
 			return mapper.convertValue(campaignResponse, Campaign.class);
@@ -294,22 +328,6 @@ public class CampaignModelImpl implements CampaignModel {
 			campaignResponse = rethinkDB.table("campaign").get(campaignId)
 					.delete().run(conn);
 			return campaignResponse;
-		} catch (Exception e) {
-			LOG.error(CampaignDataException.DB_EXCEPTION, e);
-			throw new CampaignDataException(CampaignDataException.DB_EXCEPTION);
-		}
-	}
-
-	@Override
-	public Boolean checkIfSlugExists(String userId, String campaignURLSlug)
-			throws CampaignDataException {
-		Map<String, Object> campaignResponse;
-		try {
-			campaignResponse = rethinkDB
-					.table("campaign")
-					.filter(rethinkDB.hashMap("userId", userId).with(
-							"campaignURLSlug", campaignURLSlug)).run(conn);
-			return true;
 		} catch (Exception e) {
 			LOG.error(CampaignDataException.DB_EXCEPTION, e);
 			throw new CampaignDataException(CampaignDataException.DB_EXCEPTION);

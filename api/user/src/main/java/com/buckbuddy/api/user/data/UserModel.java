@@ -117,4 +117,10 @@ public interface UserModel {
 
 	public Map<String, Object> create(User user, Boolean withPassword)
 			throws UserDataException;
+
+	public Map<String, Object> activate(Map<String, Object> userMap)
+			throws UserDataException;
+
+	public Map<String, Object> deActivate(Map<String, Object> userMap)
+			throws UserDataException;
 }

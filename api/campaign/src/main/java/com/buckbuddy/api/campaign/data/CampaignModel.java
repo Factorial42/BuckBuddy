@@ -58,7 +58,7 @@ public interface CampaignModel {
 	 * @throws CampaignDataException
 	 *             the campaign data exception
 	 */
-	public Campaign getById(String campaignId) throws CampaignDataException;
+	public Campaign getById(String campaignId, Boolean minified) throws CampaignDataException;
 
 	/**
 	 * Delete.
@@ -84,10 +84,7 @@ public interface CampaignModel {
 	public Map<String, Object> deleteById(String campaignId)
 			throws CampaignDataException;
 
-	public Campaign getByUserId(String userId) throws CampaignDataException;
-
-	public Boolean checkIfSlugExists(String userId, String slug)
-			throws CampaignDataException;
+	public Campaign getByUserId(String userId, Boolean minified) throws CampaignDataException;
 
 	public Map<String, Object> activate(Map<String, Object> campaignMap)
 			throws CampaignDataException;
@@ -95,6 +92,6 @@ public interface CampaignModel {
 	public Map<String, Object> deActivate(Map<String, Object> campaignMap)
 			throws CampaignDataException;
 
-	public Campaign getByCampaignSlug(String campaignSlug)
+	public Campaign getByCampaignSlug(String campaignSlug, Boolean minified)
 			throws CampaignDataException;
 }

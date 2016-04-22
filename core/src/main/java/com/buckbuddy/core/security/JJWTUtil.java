@@ -74,7 +74,7 @@ public class JJWTUtil {
 	public static void main(String[] args) {
 		String token = null;
 		try {
-			System.out.println(JJWTUtil.getSubject(""));
+			System.out.println(JJWTUtil.getSubject("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI4NWZhZGQ4MDI2ZDMzN2JmZDExODg3Y2MxMTBmOTA3OTJiMDVlZjk1NzcxMTNhZjk5M2VhNWRmYTg4M2NlNjkzIn0.Ee69Y-JoFqsTxRiNrp75fVLFZAtRw2SXap9iCZj5KvCL2pWcYH8sgtffiIbDD6lP1aitPjH3_mGu5191DdNJog"));
 			token = JJWTUtil.issueToken("bucky_ykqhoax_tester@tfbnw.net");
 			System.out.println("Token issued:" + token);
 

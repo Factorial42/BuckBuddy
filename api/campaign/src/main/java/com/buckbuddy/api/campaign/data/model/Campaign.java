@@ -21,6 +21,7 @@ public class Campaign {
 
 	private String userId;
 	private String userSlug;
+	private String userName;
 	private String campaignSlug;
 	private String campaignId;
 	private OffsetDateTime createdAt;
@@ -71,18 +72,17 @@ public class Campaign {
 	}
 
 	/**
-	 * @return the campaignURLSlug
+	 * @return the userName
 	 */
-	public String getCampaignURLSlug() {
-		return campaignSlug;
+	public String getUserName() {
+		return userName;
 	}
 
 	/**
-	 * @param campaignURLSlug
-	 *            the campaignURLSlug to set
+	 * @param userName the userName to set
 	 */
-	public void setCampaignURLSlug(String campaignURLSlug) {
-		this.campaignSlug = campaignURLSlug;
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 	/**
@@ -346,28 +346,25 @@ public class Campaign {
 		this.campaignNetworks = campaignNetworks;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		return "Campaign [userId=" + userId + ", userSlug=" + userSlug
-				+ ", campaignSlug=" + campaignSlug + ", campaignId="
-				+ campaignId + ", createdAt=" + createdAt + ", lastUpdatedAt="
-				+ lastUpdatedAt + ", startedAt=" + startedAt + ", endedAt="
-				+ endedAt + ", name=" + name + ", description=" + description
-				+ ", cause=" + cause + ", amount=" + amount + ", currency="
-				+ currency + ", currencyString=" + currencyString
-				+ ", contributorsCount=" + contributorsCount + ", active="
-				+ active + ", days=" + days + ", profilePics=" + profilePics
-				+ ", campaignNetworks=" + campaignNetworks + "]";
+				+ ", userName=" + userName + ", campaignSlug=" + campaignSlug
+				+ ", campaignId=" + campaignId + ", createdAt=" + createdAt
+				+ ", lastUpdatedAt=" + lastUpdatedAt + ", startedAt="
+				+ startedAt + ", endedAt=" + endedAt + ", name=" + name
+				+ ", description=" + description + ", cause=" + cause
+				+ ", amount=" + amount + ", currency=" + currency
+				+ ", currencyString=" + currencyString + ", contributorsCount="
+				+ contributorsCount + ", active=" + active + ", days=" + days
+				+ ", profilePics=" + profilePics + ", campaignNetworks="
+				+ campaignNetworks + "]";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -407,13 +404,13 @@ public class Campaign {
 				+ ((startedAt == null) ? 0 : startedAt.hashCode());
 		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
 		result = prime * result
+				+ ((userName == null) ? 0 : userName.hashCode());
+		result = prime * result
 				+ ((userSlug == null) ? 0 : userSlug.hashCode());
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -552,6 +549,13 @@ public class Campaign {
 				return false;
 			}
 		} else if (!userId.equals(other.userId)) {
+			return false;
+		}
+		if (userName == null) {
+			if (other.userName != null) {
+				return false;
+			}
+		} else if (!userName.equals(other.userName)) {
 			return false;
 		}
 		if (userSlug == null) {

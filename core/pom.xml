@@ -22,7 +22,9 @@
 		<jackson.databind.version>2.7.3</jackson.databind.version>
 		<jackson.datatype.jsr310.version>2.7.3</jackson.datatype.jsr310.version>
 		<aws.java.sdk.s3>1.10.69</aws.java.sdk.s3>
+		<aws.java.sdk.ses>1.10.69</aws.java.sdk.ses>
 		<stripe.version>2.2.0</stripe.version>
+        <spark.template.mustache.version>2.3</spark.template.mustache.version>
 	</properties>
 
 	<dependencies>
@@ -74,6 +76,11 @@
 			<version>${aws.java.sdk.s3}</version>
 		</dependency>
 		<dependency>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-java-sdk-ses</artifactId>
+		    <version>${aws.java.sdk.ses}</version>
+		</dependency>				
+		<dependency>
 			<groupId>com.stripe</groupId>
 			<artifactId>stripe-java</artifactId>
 			<version>${stripe.version}</version>
@@ -82,8 +89,12 @@
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
 			<version>1.4.7</version>
-		</dependency>
-
+		</dependency>    
+        <dependency>
+            <groupId>com.sparkjava</groupId>
+            <artifactId>spark-template-mustache</artifactId>
+            <version>${spark.template.mustache.version}</version>
+        </dependency>
 	</dependencies>
 
 	<build>

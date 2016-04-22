@@ -85,7 +85,7 @@ public class UserModelImpl implements UserModel {
 
 		// mark the user active for now. in future mark a user active only after
 		// a email verification
-		user.setActive(Boolean.TRUE);
+		user.setActive(Boolean.FALSE);
 
 		Map<String, Object> userResponse, userWithSlugResponse, userSlugResponse;
 
@@ -229,7 +229,7 @@ public class UserModelImpl implements UserModel {
 		Map<String, Object> userResponse;
 		try {
 			userResponse = rethinkDB.table("user").get(userId).run(conn);
-			if (obfuscate) {
+			if (userResponse!=null && obfuscate) {
 				userResponse = User.obfuscate(userResponse);
 			}
 			return mapper.convertValue(userResponse, User.class);
@@ -328,6 +328,46 @@ public class UserModelImpl implements UserModel {
 	public User createUserFromFBProfile(com.restfb.types.User fbUser,
 			String fbToken) {
 		return User.createUserFromFBProfile(fbUser, fbToken);
+	}
+
+	@Override
+	public Map<String, Object> activate(Map<String, Object> userMap)
+			throws UserDataException {
+
+		// add validation
+		userMap.put("lastUpdatedAt", OffsetDateTime.now());
+		userMap.put("active", Boolean.TRUE);
+
+		Map<String, Object> userResponse;
+		try {
+			userResponse = rethinkDB.table("user")
+					.get(userMap.get("userId"))
+					.update(rethinkDB.expr(userMap)).run(conn);
+			return userResponse;
+		} catch (Exception e) {
+			LOG.error(UserDataException.DB_EXCEPTION, e);
+			throw new UserDataException(UserDataException.DB_EXCEPTION);
+		}
+	}
+
+	@Override
+	public Map<String, Object> deActivate(Map<String, Object> userMap)
+			throws UserDataException {
+
+		// add validation
+		userMap.put("lastUpdatedAt", OffsetDateTime.now());
+		userMap.put("active", Boolean.FALSE);
+
+		Map<String, Object> userResponse;
+		try {
+			userResponse = rethinkDB.table("user")
+					.get(userMap.get("userId"))
+					.update(rethinkDB.expr(userMap)).run(conn);
+			return userResponse;
+		} catch (Exception e) {
+			LOG.error(UserDataException.DB_EXCEPTION, e);
+			throw new UserDataException(UserDataException.DB_EXCEPTION);
+		}
 	}
 
 	/**

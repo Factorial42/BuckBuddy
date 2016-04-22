@@ -32,6 +32,8 @@ import com.buckbuddy.core.security.JJWTUtil;
 import com.buckbuddy.core.security.SecurityUtil;
 import com.buckbuddy.core.social.FBUtil;
 import com.buckbuddy.core.utils.AWSS3Util;
+import com.buckbuddy.core.utils.AWSSESUtil;
+import com.buckbuddy.core.utils.TemplateUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -50,6 +52,9 @@ public class UserRouter {
 
 	private static final String ASSETS_URL = "http://user.assets.dev.buckbuddy.com/";
 	private static final String USER_PROFILE_PIC_PREFIX = "profile.pic";
+	private static final String EMAIL_REGISTRATION_TEMPLATE = "emails/registration.mustache";
+	private static final String FROM = "hi@buckbuddy.com";
+	private static final String SUBJECT = "Welcome to Bucking!";
 
 	/** The Constant mapper. */
 	private static final ObjectMapper mapper = new ObjectMapper()
@@ -266,6 +271,20 @@ public class UserRouter {
 				userFromDB.setToken(token);
 				buckbuddyResponse.setData(mapper.convertValue(userFromDB,
 						ObjectNode.class));
+
+				// send email registration to activate
+				Map model = new HashMap();
+				model.put("username", user.getName());
+				model.put("activationlink", "http://dev.buckbuddy.com/u/"+token+"/activate");
+				String renderedTemplate = TemplateUtil.render(
+						model, EMAIL_REGISTRATION_TEMPLATE);
+				boolean emailSent = AWSSESUtil.sendMail(FROM,
+						user.getEmail(), SUBJECT,
+						renderedTemplate);
+				if (!emailSent) {
+					LOG.info("Could not send email registration to user");
+				}
+				
 				res.type("application/json");
 				return mapper.writeValueAsString(buckbuddyResponse);
 			} else if (response != null
@@ -719,6 +738,106 @@ public class UserRouter {
 				});
 	}
 
+	private void initializeActivityRoutes() {
+		patch("/users/:token/activate",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token=req.params(":token");
+						String userId=JJWTUtil.getSubject(token);
+
+						if (userId == null) {
+							res.status(401);
+							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"Token is required.");
+						}
+
+						User user = userModelImpl.getById(userId);
+						if (user == null) {
+							res.status(404);
+							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"User not found.");
+						}
+						Map<String, Object> userMap = new HashMap<>();
+						userMap.put("userId", user.getUserId());
+						
+						Map<String, Object> response = userModelImpl
+								.activate(userMap);
+						if (response != null
+								&& response.get("replaced") instanceof Long
+								&& ((Long) response.get("replaced")) > 0) {
+							res.status(204);
+							res.type("application/json");
+						} else if (response != null
+								&& response.get("errors") instanceof Long
+								&& ((Long) response.get("errors")) > 0) {
+							res.status(500);
+							res.type("application/json");
+						} else {
+							res.status(204);
+							res.type("application/json");
+						}
+						return mapper.writeValueAsString(response);
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								UserDataException.UNKNOWN);
+					}
+				});
+
+		patch("/users/:token/deActivate",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token=req.params(":token");
+						String userId=JJWTUtil.getSubject(token);
+
+						if (userId == null) {
+							res.status(401);
+							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"Token is required.");
+						}
+
+						User user = userModelImpl.getById(userId);
+						if (user == null) {
+							res.status(404);
+							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"User not found.");
+						}
+						Map<String, Object> userMap = new HashMap<>();
+						userMap.put("userId", user.getUserId());
+
+						Map<String, Object> response = userModelImpl
+								.deActivate(userMap);
+						if (response != null
+								&& response.get("replaced") instanceof Long
+								&& ((Long) response.get("replaced")) > 0) {
+							res.status(204);
+							res.type("application/json");
+						} else if (response != null
+								&& response.get("errors") instanceof Long
+								&& ((Long) response.get("errors")) > 0) {
+							res.status(500);
+							res.type("application/json");
+						} else {
+							res.status(204);
+							res.type("application/json");
+						}
+						return mapper.writeValueAsString(response);
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								UserDataException.UNKNOWN);
+					}
+				});
+	}
+
 	/**
 	 * The main method.
 	 *
@@ -726,10 +845,12 @@ public class UserRouter {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
+		
 		UserRouter userRouter = new UserRouter();
 		userRouter.initializeCRUDRoutes();
 		userRouter.initializeLoginRoutes();
 		userRouter.initializeProfileRoutes();
+		userRouter.initializeActivityRoutes();
 	}
 
 }
