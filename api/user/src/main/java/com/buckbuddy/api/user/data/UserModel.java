@@ -115,6 +115,8 @@ public interface UserModel {
 	public User getByEmail(String email, Boolean obfuscate)
 			throws UserDataException, BuckBuddyException;
 
+	public User getByUserSlug(String userSlug) throws UserDataException;
+
 	public Map<String, Object> create(User user, Boolean withPassword)
 			throws UserDataException;
 

@@ -272,6 +272,24 @@ public class UserModelImpl implements UserModel {
 		}
 	}
 
+	@Override
+	public User getByUserSlug(String userSlug) throws UserDataException {
+		Map<String, Object> userResponse = new HashMap<>();
+		;
+		try {
+			Cursor cursor = rethinkDB.table("user")
+					.filter(rethinkDB.hashMap("userSlug", userSlug)).run(conn);
+			if (cursor.hasNext()) {
+				userResponse = (Map<String, Object>) cursor.next();
+				userResponse = User.obfuscate(userResponse);
+			}
+			return mapper.convertValue(userResponse, User.class);
+		} catch (Exception e) {
+			LOG.error(UserDataException.DB_EXCEPTION, e);
+			throw new UserDataException(UserDataException.DB_EXCEPTION);
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

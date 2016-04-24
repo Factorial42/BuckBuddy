@@ -29,6 +29,13 @@ Server: Jetty(9.3.2.v20150730)
 ## Get user by token
 curl -XGET 'localhost:4567/users/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjMzYzNGI5MTU0MzgwMmZmYjYxMzk1ZDkxYTgzYWViYTU0ZTEyMGRiMmZlYmI4ZmFkN2M5YjEzZGViOTcxYTEyIn0.m0BiopdId3pf-mTpIeztMSPBHm41-cYVAY-Qhaj4Q4cEAkPOz4cdJrlr4pAgs9xvtFtre8hr7rNJEo_Jbl1GYg'
 
+## Get user by userSlug
+Req:
+curl -XGET 'localhost:4567/users/bySlug/test-user-1461216743'
+
+Res:
+{"data":{"userId":"1a6a7a830f86c7b36c299494eb5e3a92118037d5d5fecc0f6acba80a93aae61b","userSlug":"test-user-1461216743","createdAt":1461216743.363,"lastUpdatedAt":1461216743.363,"firstName":"test","lastName":"user","email":"test3@buckbuddy.com","s3handle":"c4d45a4d4f66f861c591e69edc781888","active":true}}
+
 ## login regular user
 Req:
 curl -i -XPOST 'localhost:4567/users/login' -d '{"email":"test1@buckbuddy.com", "password":"test"}'

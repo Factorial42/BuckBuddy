@@ -99,6 +99,31 @@ public class UserRouter {
 								UserDataException.UNKNOWN);
 					}
 				});
+		get("/users/bySlug/:userSlug",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String userSlug = req.params(":userSlug");
+
+						User user = userModelImpl.getByUserSlug(userSlug);
+						if (user != null) {
+							res.status(200);
+							res.type("application/json");
+							buckbuddyResponse.setData(mapper.convertValue(user,
+									ObjectNode.class));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						} else {
+							res.status(404);
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								UserDataException.UNKNOWN);
+					}
+				});
 		get("/users/:userId",
 				(req, res) -> {
 					try {
