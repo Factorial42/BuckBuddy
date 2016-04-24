@@ -488,9 +488,9 @@ public class UserRouter {
 							// generate token
 							User userFromDB = userModelImpl.getByEmail(user
 									.getEmail());
-							String loginToken = JJWTUtil.issueToken(userFromDB
+							String token = JJWTUtil.issueToken(userFromDB
 									.getUserId());
-							userFromDB.setToken(loginToken);
+							userFromDB.setToken(token);
 
 							// upload pic
 							if (userFromDB.getProfilePic() != null) {
@@ -554,6 +554,20 @@ public class UserRouter {
 							}
 							buckbuddyResponse.setData(mapper.convertValue(
 									userFromDB, ObjectNode.class));
+
+							// send email registration to activate
+							Map model = new HashMap();
+							model.put("username", user.getName());
+							model.put("activationlink", "http://dev.buckbuddy.com/u/"+token+"/activate");
+							String renderedTemplate = TemplateUtil.render(
+									model, EMAIL_REGISTRATION_TEMPLATE);
+							boolean emailSent = AWSSESUtil.sendMail(FROM,
+									user.getEmail(), SUBJECT,
+									renderedTemplate);
+							if (!emailSent) {
+								LOG.info("Could not send email registration to user");
+							}
+							
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
 						} else if (response != null
