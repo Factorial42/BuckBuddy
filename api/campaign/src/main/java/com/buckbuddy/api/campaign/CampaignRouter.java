@@ -39,7 +39,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.restfb.types.User;
 
 public class CampaignRouter {
 
@@ -78,7 +77,6 @@ public class CampaignRouter {
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					try {
 						String token = null;
-						User user = null;
 						Campaign campaign = mapper.readValue(req.body(),
 								Campaign.class);
 
@@ -97,8 +95,7 @@ public class CampaignRouter {
 								USER_SERVICE_BASE_GET_USER
 										+ campaign.getUserId(), null);
 						if (userJson != null) {
-							user = mapper.convertValue(userJson, User.class);
-							LOG.debug("Found user with Id:{}", user.getId());
+							LOG.debug("Found user with Id:{}", userJson.get("userId")!=null?userJson.get("userId").textValue():"");
 						} else {
 							res.status(401);
 							buckbuddyResponse
@@ -109,7 +106,7 @@ public class CampaignRouter {
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
 						}
-						campaign.setUserName(user.getName());
+						campaign.setUserName(userJson.get("name")!=null?userJson.get("name").textValue():"");
 						Map<String, Object> response = campaignModelImpl
 								.create(campaign);
 						if (response != null
