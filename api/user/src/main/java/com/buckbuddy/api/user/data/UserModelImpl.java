@@ -224,11 +224,15 @@ public class UserModelImpl implements UserModel {
 	 * java.lang.Boolean)
 	 */
 	@Override
-	public User getById(String userId, Boolean obfuscate)
+	public User getById(String userId, Boolean obfuscate, Boolean minified)
 			throws UserDataException {
 		Map<String, Object> userResponse;
 		try {
-			userResponse = rethinkDB.table("user").get(userId).run(conn);
+			if(!minified) {
+				userResponse = rethinkDB.table("user").get(userId).run(conn);
+			} else {
+				userResponse = rethinkDB.table("user").get(userId).pluck("userId", "userSlug", "name", "profilePic").run(conn);
+			}
 			if (userResponse!=null && obfuscate) {
 				userResponse = User.obfuscate(userResponse);
 			}
@@ -246,7 +250,7 @@ public class UserModelImpl implements UserModel {
 	 */
 	@Override
 	public User getById(String userId) throws UserDataException {
-		return getById(userId, Boolean.TRUE);
+		return getById(userId, Boolean.TRUE, Boolean.FALSE);
 	}
 
 	@Override
@@ -404,7 +408,7 @@ public class UserModelImpl implements UserModel {
 			BuckBuddyException {
 		// user id is email encrypted. so get by user id
 		return getById(SecurityUtil.encrypt(email, SecurityUtil.SHA_256),
-				Boolean.TRUE);
+				Boolean.TRUE, Boolean.FALSE);
 	}
 
 	@Override
@@ -412,6 +416,6 @@ public class UserModelImpl implements UserModel {
 			throws UserDataException, BuckBuddyException {
 		// user id is email encrypted. so get by user id
 		return getById(SecurityUtil.encrypt(email, SecurityUtil.SHA_256),
-				obfuscate);
+				obfuscate, Boolean.FALSE);
 	}
 }

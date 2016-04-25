@@ -143,6 +143,25 @@ public class UserRouter {
 								UserDataException.UNKNOWN);
 					}
 				});
+		get("/users/:userId/minified",
+				(req, res) -> {
+					try {
+						User user = userModelImpl.getById(req.params(":userId"), Boolean.TRUE, Boolean.TRUE);
+						if (user != null) {
+							res.status(200);
+							res.type("application/json");
+						} else {
+							res.status(404);
+							res.type("application/json");
+						}
+						return mapper.writeValueAsString(user);
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								UserDataException.UNKNOWN);
+					}
+				});
 		get("/users/email/:email",
 				(req, res) -> {
 					try {

@@ -106,7 +106,6 @@ public class CampaignRouter {
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
 						}
-						campaign.setUserName(userJson.get("name")!=null?userJson.get("name").textValue():"");
 						Map<String, Object> response = campaignModelImpl
 								.create(campaign);
 						if (response != null
@@ -309,9 +308,29 @@ public class CampaignRouter {
 							res.status(404);
 							res.type("application/json");
 						}
+
+						// Get user calling user service in future.
+						JsonNode userJson = RESTClientUtil.sendGET(
+								USER_SERVICE_BASE_GET_USER
+										+ campaign.getUserId()+"/minified", null);
+						if (userJson != null) {
+							LOG.debug("Found user with Id:{}", userJson.get("userId")!=null?userJson.get("userId").textValue():"");
+						} else {
+							res.status(401);
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"Could not find User. Either user service is down or user does not exists."));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						campaign = campaign != null ? campaign : new Campaign();
+						ObjectNode campaignNode = mapper.convertValue(campaign, ObjectNode.class);
+						campaignNode.put("user", userJson);
+						
 						return mapper
-								.writeValueAsString(campaign != null ? campaign
-										: new Campaign());
+								.writeValueAsString(campaignNode);
 					} catch (CampaignDataException ude) {
 						res.status(500);
 						res.type("application/json");

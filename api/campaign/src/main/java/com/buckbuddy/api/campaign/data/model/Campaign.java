@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -17,11 +18,11 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  *
  */
 @JsonInclude(Include.NON_EMPTY)
+@JsonIgnoreProperties
 public class Campaign {
 
 	private String userId;
 	private String userSlug;
-	private String userName;
 	private String campaignSlug;
 	private String campaignId;
 	private OffsetDateTime createdAt;
@@ -69,20 +70,6 @@ public class Campaign {
 	 */
 	public void setUserSlug(String userSlug) {
 		this.userSlug = userSlug;
-	}
-
-	/**
-	 * @return the userName
-	 */
-	public String getUserName() {
-		return userName;
-	}
-
-	/**
-	 * @param userName the userName to set
-	 */
-	public void setUserName(String userName) {
-		this.userName = userName;
 	}
 
 	/**
@@ -352,16 +339,15 @@ public class Campaign {
 	@Override
 	public String toString() {
 		return "Campaign [userId=" + userId + ", userSlug=" + userSlug
-				+ ", userName=" + userName + ", campaignSlug=" + campaignSlug
-				+ ", campaignId=" + campaignId + ", createdAt=" + createdAt
-				+ ", lastUpdatedAt=" + lastUpdatedAt + ", startedAt="
-				+ startedAt + ", endedAt=" + endedAt + ", name=" + name
-				+ ", description=" + description + ", cause=" + cause
-				+ ", amount=" + amount + ", currency=" + currency
-				+ ", currencyString=" + currencyString + ", contributorsCount="
-				+ contributorsCount + ", active=" + active + ", days=" + days
-				+ ", profilePics=" + profilePics + ", campaignNetworks="
-				+ campaignNetworks + "]";
+				+ ", campaignSlug=" + campaignSlug + ", campaignId="
+				+ campaignId + ", createdAt=" + createdAt + ", lastUpdatedAt="
+				+ lastUpdatedAt + ", startedAt=" + startedAt + ", endedAt="
+				+ endedAt + ", name=" + name + ", description=" + description
+				+ ", cause=" + cause + ", amount=" + amount + ", currency="
+				+ currency + ", currencyString=" + currencyString
+				+ ", contributorsCount=" + contributorsCount + ", active="
+				+ active + ", days=" + days + ", profilePics=" + profilePics
+				+ ", campaignNetworks=" + campaignNetworks + "]";
 	}
 
 	/* (non-Javadoc)
@@ -403,8 +389,6 @@ public class Campaign {
 		result = prime * result
 				+ ((startedAt == null) ? 0 : startedAt.hashCode());
 		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
-		result = prime * result
-				+ ((userName == null) ? 0 : userName.hashCode());
 		result = prime * result
 				+ ((userSlug == null) ? 0 : userSlug.hashCode());
 		return result;
@@ -549,13 +533,6 @@ public class Campaign {
 				return false;
 			}
 		} else if (!userId.equals(other.userId)) {
-			return false;
-		}
-		if (userName == null) {
-			if (other.userName != null) {
-				return false;
-			}
-		} else if (!userName.equals(other.userName)) {
 			return false;
 		}
 		if (userSlug == null) {

@@ -101,7 +101,7 @@ public interface UserModel {
 	 */
 	public boolean emailExists(String email) throws UserDataException;
 
-	public User getById(String email, Boolean obfuscate)
+	public User getById(String email, Boolean obfuscate, Boolean minified)
 			throws UserDataException;
 
 	public User createUserFromFBProfile(com.restfb.types.User user,
