@@ -48,6 +48,7 @@ public class UserRouter {
 	/** The Constant LOG. */
 	private static final Logger LOG = LoggerFactory.getLogger(UserRouter.class);
 
+	private static final String STRIPE_BUSINESS_URL = "http://dev.buckbuddy.com";
 	private static final String S3_BUCKET = "user.assets.dev.buckbuddy.com";
 
 	private static final String ASSETS_URL = "http://user.assets.dev.buckbuddy.com/";
@@ -768,10 +769,28 @@ public class UserRouter {
 				(req, res) -> {
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					String userId = (req.params(":userId"));
-					String authorizationCode = (req.queryParams("code"));
+//					String authorizationCode = (req.queryParams("code"));
+					String tosTimestampInMillisString = (req.queryParams("tosTimestampInMillis"));
+					String tosIP = (req.queryParams("tosIP"));
 
+					if (tosTimestampInMillisString == null || tosIP == null
+							|| tosTimestampInMillisString.isEmpty()
+							|| tosIP.isEmpty()) {
+						res.status(400);
+						buckbuddyResponse.setError(mapper.createObjectNode().put(
+								"message", "TOS Timestamp and IP are mandatory"));
+						res.type("application/json");
+						return mapper.writeValueAsString(buckbuddyResponse);
+					}
+					Long tosTimestampInMillis = Long.valueOf(tosTimestampInMillisString);
+
+					// get user
+					User userFromDB = userModelImpl.getById(userId);
 					JsonNode paymentStripeProfileNode = StripeUtil
-							.getAccessToken(authorizationCode);
+							.createManagedAccount(userFromDB.getEmail(),
+									STRIPE_BUSINESS_URL,
+									tosTimestampInMillis / 1000L, tosIP);
+					;
 					ObjectNode paymentProfileNode = mapper.createObjectNode();
 					paymentProfileNode.put("stripe", paymentStripeProfileNode);
 					Map<String, Object> userMap = new HashMap<>();

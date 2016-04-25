@@ -79,7 +79,7 @@ public class StripeUtil {
 	 * tos_acceptance[date]=1461261330 \ -d tos_acceptance[ip]="23.241.119.143"
 	 * ​
 	 */
-	public static void createManagedAccount(String email, String businessUrl,
+	public static JsonNode createManagedAccount(String email, String businessUrl,
 			Long tosAcceptanceDate, String tosAcceptanceIP) {
 
 		Account managedAccount = null;
@@ -90,17 +90,22 @@ public class StripeUtil {
 		accountParams.put("managed", true);
 		accountParams.put("email", email);
 		accountParams.put("business_url", businessUrl);
-		accountParams.put("tos_acceptance[date]", tosAcceptanceDate);
-		accountParams.put("tos_acceptance[ip]", tosAcceptanceIP);
+		if (tosAcceptanceDate != null && tosAcceptanceIP != null) {
+			accountParams.put("tos_acceptance[date]", tosAcceptanceDate);
+			accountParams.put("tos_acceptance[ip]", tosAcceptanceIP);
+		}
 
 		try {
 			managedAccount = Account.create(accountParams);
-			System.out.println(managedAccount.toString());
+
+			return mapper.convertValue(managedAccount, JsonNode.class);
+
 		} catch (AuthenticationException | InvalidRequestException
 				| APIConnectionException | CardException | APIException e) {
 			LOG.error("Unable to create account for {}",
 					accountParams.toString(), e);
 		}
+		return null;
 	}
 
 	public static void retrieveBalance(String accountId) {
@@ -119,7 +124,7 @@ public class StripeUtil {
 	}
 
 	public static void acceptTOS(String connectedStripeAccountId,
-			long tosTimestamp, String tosIP) {
+			Long tosTimestamp, String tosIP) {
 		Stripe.apiKey = SECRET_KEY;
 		Account account = null;
 		try {

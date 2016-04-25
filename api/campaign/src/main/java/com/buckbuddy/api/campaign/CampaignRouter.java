@@ -106,6 +106,7 @@ public class CampaignRouter {
 							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
 						}
+						campaign.setUserSlug(userJson.get("userSlug").asText());
 						Map<String, Object> response = campaignModelImpl
 								.create(campaign);
 						if (response != null

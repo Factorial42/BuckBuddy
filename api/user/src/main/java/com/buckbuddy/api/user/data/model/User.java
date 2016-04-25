@@ -148,6 +148,13 @@ public class User {
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setNameSplitIntoFirstLast(String name) {
 		String[] nameArray = null;
 		this.name = name;
 		nameArray = name!=null?name.split(" "):new String[]{};
@@ -394,7 +401,7 @@ public class User {
 		facebookProfile.setUserAccessToken(fbToken);
 		socialProfile.setFacebookProfile(facebookProfile);
 		user.setSocialProfiles(socialProfile);
-		user.setName(fbUser.getName());
+		user.setNameSplitIntoFirstLast(fbUser.getName());
 		user.setProfilePic(fbUser.getPicture().getUrl());
 		
 		user.setEmail(fbUser.getEmail());

@@ -105,11 +105,11 @@ Server: Jetty(9.3.2.v20150730)
 
 ## Get Access Token and update Stripe Payment profile for user
 Req:
-curl -i -XPOST 'localhost:4567/users/782159708e9bb3e3af5c9bdf1ff77f70823418d16970eb82fe4d7e1ca5ca69ac/paymentProfile?code=ac_8HN3KMoW6NHdwvCZuWEtBBtbySE8wGeT'
+curl -i -XPOST 'localhost:4567/users/1a6a7a830f86c7b36c299494eb5e3a92118037d5d5fecc0f6acba80a93aae61b/paymentProfile?tosTimestampInMillis=1461622327000&tosIP=75.82.205.237'
 
 Res:
 HTTP/1.1 204 No Content
-Date: Sat, 16 Apr 2016 07:57:41 GMT
+Date: Mon, 25 Apr 2016 22:13:07 GMT
 Content-Type: application/json
 Server: Jetty(9.3.2.v20150730)
 
