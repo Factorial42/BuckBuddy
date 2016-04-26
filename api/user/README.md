@@ -105,7 +105,7 @@ Server: Jetty(9.3.2.v20150730)
 
 ## Create Stripe profile(managed account) for user
 Req:
-curl -i -XPOST 'localhost:4567/users/1a6a7a830f86c7b36c299494eb5e3a92118037d5d5fecc0f6acba80a93aae61b/paymentProfile?tosTimestampInMillis=1461622327000&tosIP=75.82.205.237'
+curl -i -XPOST 'localhost:4567/users/1a6a7a830f86c7b36c299494eb5e3a92118037d5d5fecc0f6acba80a93aae61b/paymentProfile?tosTimestampInMillis=1461622327000'
 
 Res:
 HTTP/1.1 204 No Content
