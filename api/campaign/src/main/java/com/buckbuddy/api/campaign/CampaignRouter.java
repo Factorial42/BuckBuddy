@@ -387,7 +387,7 @@ public class CampaignRouter {
 
 						Map<String, Object> campaignMap = mapper.readValue(
 								req.body(), Map.class);
-						if (campaignMap.get("campaignId") != null) {
+						if (campaignMap.get("campaignId") == null) {
 							res.status(403);
 							res.type("application/json");
 							return mapper.createObjectNode().put("error",
