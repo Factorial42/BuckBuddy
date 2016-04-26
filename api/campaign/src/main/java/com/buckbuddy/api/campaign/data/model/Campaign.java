@@ -33,6 +33,7 @@ public class Campaign {
 	private String description;
 	private String cause;
 	private BigDecimal amount;
+	private BigDecimal collectedAmount;
 	private Currency currency;
 	private String currencyString;
 	private Long contributorsCount;
@@ -223,6 +224,20 @@ public class Campaign {
 	}
 
 	/**
+	 * @return the collectedAmount
+	 */
+	public BigDecimal getCollectedAmount() {
+		return collectedAmount;
+	}
+
+	/**
+	 * @param collectedAmount the collectedAmount to set
+	 */
+	public void setCollectedAmount(BigDecimal collectedAmount) {
+		this.collectedAmount = collectedAmount;
+	}
+
+	/**
 	 * @return the currency
 	 */
 	public Currency getCurrency() {
@@ -343,7 +358,8 @@ public class Campaign {
 				+ campaignId + ", createdAt=" + createdAt + ", lastUpdatedAt="
 				+ lastUpdatedAt + ", startedAt=" + startedAt + ", endedAt="
 				+ endedAt + ", name=" + name + ", description=" + description
-				+ ", cause=" + cause + ", amount=" + amount + ", currency="
+				+ ", cause=" + cause + ", amount=" + amount
+				+ ", collectedAmount=" + collectedAmount + ", currency="
 				+ currency + ", currencyString=" + currencyString
 				+ ", contributorsCount=" + contributorsCount + ", active="
 				+ active + ", days=" + days + ", profilePics=" + profilePics
@@ -367,6 +383,8 @@ public class Campaign {
 		result = prime * result
 				+ ((campaignSlug == null) ? 0 : campaignSlug.hashCode());
 		result = prime * result + ((cause == null) ? 0 : cause.hashCode());
+		result = prime * result
+				+ ((collectedAmount == null) ? 0 : collectedAmount.hashCode());
 		result = prime
 				* result
 				+ ((contributorsCount == null) ? 0 : contributorsCount
@@ -449,6 +467,13 @@ public class Campaign {
 				return false;
 			}
 		} else if (!cause.equals(other.cause)) {
+			return false;
+		}
+		if (collectedAmount == null) {
+			if (other.collectedAmount != null) {
+				return false;
+			}
+		} else if (!collectedAmount.equals(other.collectedAmount)) {
 			return false;
 		}
 		if (contributorsCount == null) {
