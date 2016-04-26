@@ -21,6 +21,8 @@ import javax.servlet.http.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import spark.Request;
+
 import com.buckbuddy.api.user.data.UserDataException;
 import com.buckbuddy.api.user.data.UserModel;
 import com.buckbuddy.api.user.data.UserModelImpl;
@@ -56,6 +58,10 @@ public class UserRouter {
 	private static final String EMAIL_REGISTRATION_TEMPLATE = "emails/registration.mustache";
 	private static final String FROM = "hi@buckbuddy.com";
 	private static final String SUBJECT = "Welcome to Bucking!";
+	private static final String[] HEADERS_TO_TRY = { "X-Forwarded-For",
+			"Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_X_FORWARDED_FOR",
+			"HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_CLIENT_IP",
+			"HTTP_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "REMOTE_ADDR" };
 
 	/** The Constant mapper. */
 	private static final ObjectMapper mapper = new ObjectMapper()
@@ -771,8 +777,7 @@ public class UserRouter {
 					String userId = (req.params(":userId"));
 //					String authorizationCode = (req.queryParams("code"));
 					String tosTimestampInMillisString = (req.queryParams("tosTimestampInMillis"));
-					String tosIP = (req.queryParams("tosIP"));
-
+					String tosIP = getClientIpAddress(req);
 					if (tosTimestampInMillisString == null || tosIP == null
 							|| tosTimestampInMillisString.isEmpty()
 							|| tosIP.isEmpty()) {
@@ -813,6 +818,19 @@ public class UserRouter {
 					}
 					return mapper.writeValueAsString(buckbuddyResponse);
 				});
+	}
+
+	private String getClientIpAddress(Request req) {
+		if(req.ip()!=null && !req.ip().isEmpty()) {
+			return req.ip();
+		}
+	    for (String header : HEADERS_TO_TRY) {
+	        String ip = req.headers(header);
+	        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+	            return ip;
+	        }
+	    }
+	    return "";
 	}
 
 	private void initializeActivityRoutes() {
@@ -917,6 +935,7 @@ public class UserRouter {
 				});
 	}
 
+	
 	/**
 	 * The main method.
 	 *
