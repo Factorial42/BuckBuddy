@@ -83,7 +83,7 @@ public class UserModelImpl implements UserModel {
 		user.setCreatedAt(OffsetDateTime.now());
 		user.setLastUpdatedAt(user.getCreatedAt());
 
-		// mark the user active for now. in future mark a user active only after
+		// mark a user active only after
 		// a email verification
 		user.setActive(Boolean.FALSE);
 

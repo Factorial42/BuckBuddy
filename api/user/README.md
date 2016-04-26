@@ -103,7 +103,7 @@ Server: Jetty(9.3.2.v20150730)
 
 {}
 
-## Get Access Token and update Stripe Payment profile for user
+## Create Stripe profile(managed account) for user
 Req:
 curl -i -XPOST 'localhost:4567/users/1a6a7a830f86c7b36c299494eb5e3a92118037d5d5fecc0f6acba80a93aae61b/paymentProfile?tosTimestampInMillis=1461622327000&tosIP=75.82.205.237'
 
@@ -113,4 +113,22 @@ Date: Mon, 25 Apr 2016 22:13:07 GMT
 Content-Type: application/json
 Server: Jetty(9.3.2.v20150730)
 
+## Activate user
+Req:
+curl -i -XPATCH 'localhost:4567/users/:token/activate'
 
+Res:
+HTTP/1.1 204 No Content
+Date: Tue, 26 Apr 2016 15:55:35 GMT
+Content-Type: application/json
+Server: Jetty(9.3.2.v20150730)
+
+## DeActivate User
+Req:
+curl -i -XPATCH 'localhost:4567/users/:token/deActivate'
+
+Res:
+HTTP/1.1 204 No Content
+Date: Tue, 26 Apr 2016 15:55:53 GMT
+Content-Type: application/json
+Server: Jetty(9.3.2.v20150730)

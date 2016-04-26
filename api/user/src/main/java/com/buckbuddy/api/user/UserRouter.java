@@ -847,6 +847,8 @@ public class UserRouter {
 								&& ((Long) response.get("replaced")) > 0) {
 							res.status(204);
 							res.type("application/json");
+							
+							// activate campaign
 						} else if (response != null
 								&& response.get("errors") instanceof Long
 								&& ((Long) response.get("errors")) > 0) {
