@@ -74,21 +74,7 @@ public class JJWTUtil {
 	public static void main(String[] args) {
 		String token = null;
 		try {
-			System.out.println(JJWTUtil.getSubject("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI4NWZhZGQ4MDI2ZDMzN2JmZDExODg3Y2MxMTBmOTA3OTJiMDVlZjk1NzcxMTNhZjk5M2VhNWRmYTg4M2NlNjkzIn0.Ee69Y-JoFqsTxRiNrp75fVLFZAtRw2SXap9iCZj5KvCL2pWcYH8sgtffiIbDD6lP1aitPjH3_mGu5191DdNJog"));
-			token = JJWTUtil.issueToken("bucky_ykqhoax_tester@tfbnw.net");
-			System.out.println("Token issued:" + token);
-
-			// success test
-			boolean authenticated = JJWTUtil.authenticate(
-					"bucky_ykqhoax_tester@tfbnw.net", token);
-			System.out.println("Authenticated:" + authenticated);
-
-			// failure test
-			authenticated = JJWTUtil.authenticate(
-					"bucky_ykqhoax_tester@tfbnw.net", token.replaceFirst(token
-							.substring(token.length() - 4, token.length() - 1),
-							"test"));
-			System.out.println("Authenticated:" + authenticated);
+			System.out.println(issueToken("ec67978322e5fbd7604e8db2ad0e89ab1fc4b7dee0a9a9655fb662b8ae647e71"));
 		} catch (BuckBuddyException e) {
 			LOG.error("Error issuing token", e);
 		}

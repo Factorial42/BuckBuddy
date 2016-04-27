@@ -738,6 +738,45 @@ public class CampaignRouter {
 					}
 				});
 
+		post("/campaigns/byUserId/:userId/activate",
+				(req, res) -> {
+					try {
+
+						Map<String, Object> campaignMap = new HashMap<>();
+						String userId = (req.params(":userId"));
+						if (userId == null) {
+							res.status(403);
+							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"User ID is required.");
+						}
+						campaignMap.put("userId", userId);
+
+						Map<String, Object> response = campaignModelImpl
+								.activateByUserId(userId);
+						if (response != null
+								&& response.get("replaced") instanceof Long
+								&& ((Long) response.get("replaced")) > 0) {
+							res.status(204);
+							res.type("application/json");
+						} else if (response != null
+								&& response.get("errors") instanceof Long
+								&& ((Long) response.get("errors")) > 0) {
+							res.status(500);
+							res.type("application/json");
+						} else {
+							res.status(204);
+							res.type("application/json");
+						}
+						return mapper.writeValueAsString(response);
+					} catch (CampaignDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								CampaignDataException.UNKNOWN);
+					}
+				});
+
 		patch("/campaigns/:campaignId/deActivate",
 				(req, res) -> {
 					try {

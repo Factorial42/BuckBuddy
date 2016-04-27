@@ -94,4 +94,7 @@ public interface CampaignModel {
 
 	public Campaign getByCampaignSlug(String campaignSlug, Boolean minified)
 			throws CampaignDataException;
+
+	public Map<String, Object> activateByUserId(String userId)
+			throws CampaignDataException;
 }

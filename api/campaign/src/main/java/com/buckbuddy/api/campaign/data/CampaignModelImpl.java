@@ -69,9 +69,6 @@ public class CampaignModelImpl implements CampaignModel {
 		campaign.setLastUpdatedAt(campaign.getCreatedAt());
 		campaign.setContributorsCount(0L);
 
-		// mark active by default
-		campaign.setActive(Boolean.TRUE);
-
 		Map<String, Object> campaignResponse, campaignWithSlugResponse, campaignSlugResponse;
 		;
 
@@ -347,6 +344,29 @@ public class CampaignModelImpl implements CampaignModel {
 		try {
 			campaignResponse = rethinkDB.table("campaign")
 					.get(campaignMap.get("campaignId"))
+					.update(rethinkDB.expr(campaignMap)).run(conn);
+			return campaignResponse;
+		} catch (Exception e) {
+			LOG.error(CampaignDataException.DB_EXCEPTION, e);
+			throw new CampaignDataException(CampaignDataException.DB_EXCEPTION);
+		}
+	}
+
+	@Override
+	public Map<String, Object> activateByUserId(String userId)
+			throws CampaignDataException {
+
+		// add validation
+		Map<String, Object> campaignMap = new HashMap<>();
+		campaignMap.put("lastUpdatedAt", OffsetDateTime.now());
+		campaignMap.put("startedAt", OffsetDateTime.now());
+		campaignMap.put("userId", userId);
+		campaignMap.put("active", Boolean.TRUE);
+
+		Map<String, Object> campaignResponse;
+		try {
+			campaignResponse = rethinkDB.table("campaign")
+					.filter(rethinkDB.hashMap("userId", userId))
 					.update(rethinkDB.expr(campaignMap)).run(conn);
 			return campaignResponse;
 		} catch (Exception e) {

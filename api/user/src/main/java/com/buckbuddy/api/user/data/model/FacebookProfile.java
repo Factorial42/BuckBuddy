@@ -15,9 +15,6 @@ public class FacebookProfile {
 	private String name;
 	private String facebookID;
 	private String pic;
-	private String firstName;
-	private String middleName;
-	private String lastName;
 	private String email;
 	private String userAccessToken;
 	private String appAccessToken;
@@ -29,14 +26,6 @@ public class FacebookProfile {
 	 */
 	public FacebookProfile() {
 		// TODO Auto-generated constructor stub
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
 	}
 
 	/**
@@ -79,22 +68,6 @@ public class FacebookProfile {
 	 */
 	public void setPic(String pic) {
 		this.pic = pic;
-	}
-
-	public String getMiddleName() {
-		return middleName;
-	}
-
-	public void setMiddleName(String middleName) {
-		this.middleName = middleName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
 	}
 
 	public String getEmail() {
@@ -142,11 +115,11 @@ public class FacebookProfile {
 	 */
 	@Override
 	public String toString() {
-		return "FacebookProfile [firstName=" + firstName + ", middleName="
-				+ middleName + ", lastName=" + lastName + ", email=" + email
-				+ ", userAccessToken=" + userAccessToken + ", appAccessToken="
-				+ appAccessToken + ", pageAccessToken=" + pageAccessToken
-				+ ", clientToken=" + clientToken + "]";
+		return "FacebookProfile [name=" + name + ", facebookID=" + facebookID
+				+ ", pic=" + pic + ", email=" + email + ", userAccessToken="
+				+ userAccessToken + ", appAccessToken=" + appAccessToken
+				+ ", pageAccessToken=" + pageAccessToken + ", clientToken="
+				+ clientToken + "]";
 	}
 
 	/* (non-Javadoc)
@@ -162,13 +135,11 @@ public class FacebookProfile {
 				+ ((clientToken == null) ? 0 : clientToken.hashCode());
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
 		result = prime * result
-				+ ((firstName == null) ? 0 : firstName.hashCode());
-		result = prime * result
-				+ ((lastName == null) ? 0 : lastName.hashCode());
-		result = prime * result
-				+ ((middleName == null) ? 0 : middleName.hashCode());
+				+ ((facebookID == null) ? 0 : facebookID.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
 				+ ((pageAccessToken == null) ? 0 : pageAccessToken.hashCode());
+		result = prime * result + ((pic == null) ? 0 : pic.hashCode());
 		result = prime * result
 				+ ((userAccessToken == null) ? 0 : userAccessToken.hashCode());
 		return result;
@@ -210,25 +181,18 @@ public class FacebookProfile {
 		} else if (!email.equals(other.email)) {
 			return false;
 		}
-		if (firstName == null) {
-			if (other.firstName != null) {
+		if (facebookID == null) {
+			if (other.facebookID != null) {
 				return false;
 			}
-		} else if (!firstName.equals(other.firstName)) {
+		} else if (!facebookID.equals(other.facebookID)) {
 			return false;
 		}
-		if (lastName == null) {
-			if (other.lastName != null) {
+		if (name == null) {
+			if (other.name != null) {
 				return false;
 			}
-		} else if (!lastName.equals(other.lastName)) {
-			return false;
-		}
-		if (middleName == null) {
-			if (other.middleName != null) {
-				return false;
-			}
-		} else if (!middleName.equals(other.middleName)) {
+		} else if (!name.equals(other.name)) {
 			return false;
 		}
 		if (pageAccessToken == null) {
@@ -236,6 +200,13 @@ public class FacebookProfile {
 				return false;
 			}
 		} else if (!pageAccessToken.equals(other.pageAccessToken)) {
+			return false;
+		}
+		if (pic == null) {
+			if (other.pic != null) {
+				return false;
+			}
+		} else if (!pic.equals(other.pic)) {
 			return false;
 		}
 		if (userAccessToken == null) {

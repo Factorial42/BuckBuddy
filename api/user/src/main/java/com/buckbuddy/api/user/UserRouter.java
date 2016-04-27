@@ -35,6 +35,7 @@ import com.buckbuddy.core.security.SecurityUtil;
 import com.buckbuddy.core.social.FBUtil;
 import com.buckbuddy.core.utils.AWSS3Util;
 import com.buckbuddy.core.utils.AWSSESUtil;
+import com.buckbuddy.core.utils.RESTClientUtil;
 import com.buckbuddy.core.utils.TemplateUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,6 +53,7 @@ public class UserRouter {
 
 	private static final String STRIPE_BUSINESS_URL = "http://dev.buckbuddy.com";
 	private static final String S3_BUCKET = "user.assets.dev.buckbuddy.com";
+	private static final String CAMPAIGN_SERVICE_BASE_ACTIVATE_BY_USER_ID = "http://localhost:4568/campaigns/byUserId/:userId/activate";
 
 	private static final String ASSETS_URL = "http://user.assets.dev.buckbuddy.com/";
 	private static final String USER_PROFILE_PIC_PREFIX = "profile.pic";
@@ -838,8 +840,8 @@ public class UserRouter {
 				(req, res) -> {
 					try {
 						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
-						String token=req.params(":token");
-						String userId=JJWTUtil.getSubject(token);
+						String token = req.params(":token");
+						String userId = JJWTUtil.getSubject(token);
 
 						if (userId == null) {
 							res.status(401);
@@ -857,31 +859,59 @@ public class UserRouter {
 						}
 						Map<String, Object> userMap = new HashMap<>();
 						userMap.put("userId", user.getUserId());
-						
+
 						Map<String, Object> response = userModelImpl
 								.activate(userMap);
 						if (response != null
 								&& response.get("replaced") instanceof Long
 								&& ((Long) response.get("replaced")) > 0) {
-							res.status(204);
+							res.status(200);
 							res.type("application/json");
-							
+
 							// activate campaign
+							JsonNode campaignActivateJson=null;
+							try {
+								campaignActivateJson = RESTClientUtil.sendPOST(
+										CAMPAIGN_SERVICE_BASE_ACTIVATE_BY_USER_ID
+												.replace(":userId", userId), null);
+							} catch(Exception e) {
+								LOG.error(
+										"Could not activate campaign for user id {}",
+										userId);
+								return mapper.createObjectNode().put(
+										"error",
+										"Could not activate campaign for:"
+												+ userId);
+							}
+							if (campaignActivateJson != null
+									&& !campaignActivateJson.findPath("errors")
+											.isMissingNode()) {
+								LOG.error(
+										"Could not activate campaign for user id {}",
+										userId);
+								return mapper.createObjectNode().put(
+										"error",
+										"Could not activate campaign for:"
+												+ userId);
+							}
+							return mapper.writeValueAsString(buckbuddyResponse);
 						} else if (response != null
 								&& response.get("errors") instanceof Long
 								&& ((Long) response.get("errors")) > 0) {
 							res.status(500);
 							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"Could not activate User:" + userId);
 						} else {
 							res.status(204);
 							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
 						}
-						return mapper.writeValueAsString(response);
 					} catch (UserDataException ude) {
 						res.status(500);
 						res.type("application/json");
 						return mapper.createObjectNode().put("error",
-								UserDataException.UNKNOWN);
+								"Could not activate User:");
 					}
 				});
 
