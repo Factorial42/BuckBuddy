@@ -10,7 +10,7 @@ r.db('buckbuddy').table('campaign').indexCreate('userId');
 
 r.db('buckbuddy').tableCreate('campaignSlug', {primaryKey: 'campaignSlug'});
 
-r.db('buckbuddy').tableCreate('donation', {primaryKey: 'transactionId'});
+r.db('buckbuddy').tableCreate('donation', {primaryKey: 'donationId'});
 
 # sample input
 ## user
