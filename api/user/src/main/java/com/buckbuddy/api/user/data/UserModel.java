@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.buckbuddy.api.user.data.model.User;
 import com.buckbuddy.core.exceptions.BuckBuddyException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -117,6 +118,8 @@ public interface UserModel {
 
 	public User getByUserSlug(String userSlug) throws UserDataException;
 
+	public User getByUserSlug(String userSlug, Boolean obfuscate, Boolean minified) throws UserDataException;
+
 	public Map<String, Object> create(User user, Boolean withPassword)
 			throws UserDataException;
 
@@ -125,4 +128,7 @@ public interface UserModel {
 
 	public Map<String, Object> deActivate(Map<String, Object> userMap)
 			throws UserDataException;
+
+	public Map<String, Object> updateUserMapWithPaymentProfile(
+			Map<String, Object> userMap, JsonNode paymentStripeProfileNode);
 }

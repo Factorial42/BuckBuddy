@@ -757,15 +757,56 @@ public class CampaignRouter {
 						if (response != null
 								&& response.get("replaced") instanceof Long
 								&& ((Long) response.get("replaced")) > 0) {
-							res.status(204);
+							res.status(200);
 							res.type("application/json");
 						} else if (response != null
 								&& response.get("errors") instanceof Long
 								&& ((Long) response.get("errors")) > 0) {
 							res.status(500);
 							res.type("application/json");
-						} else {
-							res.status(204);
+						}
+						return mapper.writeValueAsString(response);
+					} catch (CampaignDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								CampaignDataException.UNKNOWN);
+					}
+				});
+		post("/campaigns/bySlug/:campaignSlug/updateContributions",
+				(req, res) -> {
+					try {
+
+						Map<String, Object> campaignMap = new HashMap<>();
+						String campaignSlug = (req.params(":campaignSlug"));
+						String donationAmountString = (req.queryParams("donationAmount"));
+						Long donationAmount = donationAmountString != null
+								&& !donationAmountString.isEmpty() ? Long
+								.valueOf(donationAmountString) : 0L;
+						if (campaignSlug == null) {
+							res.status(403);
+							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"Campaign Slug is required.");
+						}
+						if(donationAmount<=0L) {
+							res.status(403);
+							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"Donation amount should be greater than 0.");
+						}
+
+						Map<String, Object> response = campaignModelImpl
+								.updateContributionsBySlug(campaignSlug, donationAmount);
+						if (response != null
+								&& response.get("replaced") instanceof Long
+								&& ((Long) response.get("replaced")) > 0) {
+							res.status(200);
+							res.type("application/json");
+						} else if (response != null
+								&& response.get("errors") instanceof Long
+								&& ((Long) response.get("errors")) > 0) {
+							res.status(500);
 							res.type("application/json");
 						}
 						return mapper.writeValueAsString(response);

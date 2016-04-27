@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,6 +18,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.buckbuddy.core.exceptions.BuckBuddyException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stripe.Stripe;
@@ -49,6 +52,13 @@ public class StripeUtil {
 	private static String AUTHORIZATION_CODE = "authorization_code";
 	private static String REFRESH_TOKEN = "refresh_token";
 
+	private static BigDecimal STRIPE_BASE_FIXED_CHARGE_IN_CENTS = new BigDecimal(
+			30);
+	private static BigDecimal STRIPE_BASE_PERCENTAGE_CHARGE_X_100 = new BigDecimal(
+			290);
+	private static BigDecimal BUCKBUDDY_BASE_FIXED_CHARGE_IN_PERCENTAGE_X_100 = new BigDecimal(
+			500);
+
 	public static JsonNode getAccessToken(String code) {
 		JsonNode node = null;
 		String response = connectToStripe(code, AUTHORIZATION_CODE);
@@ -79,8 +89,8 @@ public class StripeUtil {
 	 * tos_acceptance[date]=1461261330 \ -d tos_acceptance[ip]="23.241.119.143"
 	 * ​
 	 */
-	public static JsonNode createManagedAccount(String email, String businessUrl,
-			Long tosAcceptanceDate, String tosAcceptanceIP) {
+	public static JsonNode createManagedAccount(String email,
+			String businessUrl, Long tosAcceptanceDate, String tosAcceptanceIP) throws BuckBuddyException {
 
 		Account managedAccount = null;
 		Stripe.apiKey = SECRET_KEY;
@@ -104,8 +114,8 @@ public class StripeUtil {
 				| APIConnectionException | CardException | APIException e) {
 			LOG.error("Unable to create account for {}",
 					accountParams.toString(), e);
+			throw new BuckBuddyException("Could not charge user.", e);
 		}
-		return null;
 	}
 
 	public static void retrieveBalance(String accountId) {
@@ -225,8 +235,8 @@ public class StripeUtil {
 		}
 	}
 
-	public static void chargeUser(String token, String amount, String currency,
-			String description, String connectedAccountId, String applicationFee) {
+	public static JsonNode chargeUser(String token, BigDecimal amountInCents,
+			String currency, String description, String connectedAccountId) throws BuckBuddyException {
 		/*
 		 * //Charge a user curl https://api.stripe.com/v1/charges -u
 		 * _test_EGU9Ur5y4V8vJIkFZPLa81xU: \ -d amount=40 -d currency=usd -d
@@ -242,21 +252,40 @@ public class StripeUtil {
 		// Create the charge on Stripe's servers - this will charge the user's
 		// card
 		try {
+			BigDecimal applicationFeeInCents = computeApplicationFeeInCents(amountInCents);
+			// if both amount and app fee are two decimals, amount to charge
+			// should also end up in max two decimals
+			BigDecimal amountToCharge = amountInCents.subtract(applicationFeeInCents);
 			Map<String, Object> chargeParams = new HashMap<String, Object>();
-			chargeParams.put("amount", amount); // amount in cents, again
+
+			chargeParams.put("amount", amountInCents);
 			chargeParams.put("currency", currency);
 			chargeParams.put("source", token);
 			chargeParams.put("description", description);
 			chargeParams.put("destination", connectedAccountId);
-			chargeParams.put("application_fee", applicationFee);
+			chargeParams.put("application_fee", applicationFeeInCents.toString());
 
 			Charge charge = Charge.create(chargeParams);
-			System.out.println(charge.toString());
+			return mapper.convertValue(charge, JsonNode.class);
 		} catch (CardException | AuthenticationException
 				| InvalidRequestException | APIConnectionException
 				| APIException e) {
 			LOG.error("Could not charge user.", e);
+			throw new BuckBuddyException("Could not charge user.", e);
 		}
+	}
+
+	private static BigDecimal computeApplicationFeeInCents(BigDecimal amountInCents) {
+		BigDecimal applicationFee = STRIPE_BASE_FIXED_CHARGE_IN_CENTS;
+		BigDecimal percentageAdds = STRIPE_BASE_PERCENTAGE_CHARGE_X_100
+				.add(BUCKBUDDY_BASE_FIXED_CHARGE_IN_PERCENTAGE_X_100);
+
+		BigDecimal percentageOfAmountInCents = amountInCents
+				.multiply(percentageAdds);
+		percentageOfAmountInCents = percentageOfAmountInCents
+				.divide(new BigDecimal(10000));
+		applicationFee = applicationFee.add(percentageOfAmountInCents);
+		return applicationFee.setScale(0, RoundingMode.HALF_UP);
 	}
 
 	private static String connectToStripe(String token, String grantType) {
@@ -343,8 +372,9 @@ public class StripeUtil {
 
 	/**
 	 * @param args
+	 * @throws BuckBuddyException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws BuckBuddyException {
 		// JsonNode response = StripeUtil
 		// .getAccessToken("ac_8HFPW2Yf5bkfX8EKega1pp2vZn1sOVki");
 		// String refreshToken = response.findPath("refresh_token").asText();
@@ -356,8 +386,9 @@ public class StripeUtil {
 				(long) System.currentTimeMillis() / 1000L, "23.241.119.143");
 
 		Token testToken = createTestCreditCardToken();
-		StripeUtil.chargeUser(testToken.getId(), "100", "USD", "test charge",
-				"acct_183AFtIiad52S0yY", "20");
+		StripeUtil.chargeUser(testToken.getId(), new BigDecimal(100), "USD",
+				"test charge", "acct_183AFtIiad52S0yY");
+		
 		StripeUtil.retrieveBalance("acct_183AFtIiad52S0yY");
 
 		Token testBAToken = createTestBankAccountToken();
@@ -366,6 +397,8 @@ public class StripeUtil {
 
 		updateManagedAccountWithLegalEntity("acct_183AFtIiad52S0yY", "1", "1",
 				"1973", "Test", "Buddy", "individual");
+
+		System.out.println(computeApplicationFeeInCents(new BigDecimal(100)));
 	}
 
 }

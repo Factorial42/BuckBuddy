@@ -386,6 +386,7 @@ public class User {
 
 	public static Map<String, Object> obfuscate(Map<String, Object> user) {
 		user.remove("password");
+		user.remove("paymentProfiles");
 		return user;
 	}
 

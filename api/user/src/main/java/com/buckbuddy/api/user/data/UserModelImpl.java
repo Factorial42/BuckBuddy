@@ -17,7 +17,9 @@ import com.buckbuddy.api.user.data.model.UserSlug;
 import com.buckbuddy.core.exceptions.BuckBuddyException;
 import com.buckbuddy.core.security.SecurityUtil;
 import com.buckbuddy.core.utils.StringUtils;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rethinkdb.RethinkDB;
 import com.rethinkdb.net.Connection;
@@ -294,6 +296,34 @@ public class UserModelImpl implements UserModel {
 		}
 	}
 
+	@Override
+	public User getByUserSlug(String userSlug, Boolean obfuscate, Boolean minified) throws UserDataException {
+		Map<String, Object> userResponse = new HashMap<>();
+		;
+		try {
+			Cursor cursor = null;
+			
+			if(!minified) {
+				cursor= rethinkDB.table("user")
+					.filter(rethinkDB.hashMap("userSlug", userSlug)).run(conn);
+			} else {
+				cursor= rethinkDB.table("user")
+						.filter(rethinkDB.hashMap("userSlug", userSlug))
+						.pluck("userId", "userSlug", "name", "profilePic").run(conn);
+			}
+			if (cursor.hasNext()) {
+				userResponse = (Map<String, Object>) cursor.next();
+				if(obfuscate) {
+					userResponse = User.obfuscate(userResponse);
+				}
+			}
+			return mapper.convertValue(userResponse, User.class);
+		} catch (Exception e) {
+			LOG.error(UserDataException.DB_EXCEPTION, e);
+			throw new UserDataException(UserDataException.DB_EXCEPTION);
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -417,5 +447,39 @@ public class UserModelImpl implements UserModel {
 		// user id is email encrypted. so get by user id
 		return getById(SecurityUtil.encrypt(email, SecurityUtil.SHA_256),
 				obfuscate, Boolean.FALSE);
+	}
+
+	@Override
+	public Map<String, Object> updateUserMapWithPaymentProfile(
+			Map<String, Object> userMap, JsonNode paymentStripeProfileNode) {
+		ObjectNode paymentProfileNode = mapper.createObjectNode();
+		ObjectNode accountResponse=mapper.createObjectNode();
+		accountResponse.put("createAccountResponse", paymentStripeProfileNode);
+
+		accountResponse.put("accountId", !paymentStripeProfileNode.findPath("id")
+				.isMissingNode() ? paymentStripeProfileNode.findPath("id")
+				.asText() : "");
+		accountResponse.put("country", !paymentStripeProfileNode.findPath("country")
+				.isMissingNode() ? paymentStripeProfileNode.findPath("country")
+				.asText() : "");
+		paymentProfileNode.put(
+				"stripe", accountResponse);
+		userMap.put("paymentProfiles", mapper.convertValue(paymentProfileNode, Map.class));
+		if (!paymentStripeProfileNode.findPath("keys").isMissingNode()) {
+			userMap.put(
+					"stripePublishableKey",
+					!paymentStripeProfileNode.findPath("keys")
+							.findPath("publishable").isMissingNode() ? paymentStripeProfileNode
+							.findPath("keys").findPath("publishable").asText()
+							: "");
+			userMap.put(
+					"stripeSecretKey",
+					!paymentStripeProfileNode.findPath("keys")
+							.findPath("secret").isMissingNode() ? paymentStripeProfileNode
+							.findPath("keys").findPath("secret").asText()
+							: "");
+		}
+		
+		return userMap;
 	}
 }

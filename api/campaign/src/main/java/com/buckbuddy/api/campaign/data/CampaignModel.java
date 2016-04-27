@@ -97,4 +97,7 @@ public interface CampaignModel {
 
 	public Map<String, Object> activateByUserId(String userId)
 			throws CampaignDataException;
+
+	public Map<String, Object> updateContributionsBySlug(String campaignId,
+			Long donationAmount) throws CampaignDataException;
 }

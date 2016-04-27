@@ -4,6 +4,7 @@
 package com.buckbuddy.api.user.data.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * @author jtandalai
@@ -20,8 +21,10 @@ public class Stripe {
 	private String refreshToken;
 	private String tokenType;
 	private String stripePublishableKey;
+	private String stripeSecretKey;
 	private String stripeUserId;
 	private String scope;
+	private JsonNode createAccountResponse;
 
 
 	/**
@@ -147,6 +150,20 @@ public class Stripe {
 	}
 
 	/**
+	 * @return the stripeSecretKey
+	 */
+	public String getStripeSecretKey() {
+		return stripeSecretKey;
+	}
+
+	/**
+	 * @param stripeSecretKey the stripeSecretKey to set
+	 */
+	public void setStripeSecretKey(String stripeSecretKey) {
+		this.stripeSecretKey = stripeSecretKey;
+	}
+
+	/**
 	 * @return the stripeUserId
 	 */
 	public String getStripeUserId() {
@@ -174,6 +191,20 @@ public class Stripe {
 		this.scope = scope;
 	}
 
+	/**
+	 * @return the createAccountResponse
+	 */
+	public JsonNode getCreateAccountResponse() {
+		return createAccountResponse;
+	}
+
+	/**
+	 * @param createAccountResponse the createAccountResponse to set
+	 */
+	public void setCreateAccountResponse(JsonNode createAccountResponse) {
+		this.createAccountResponse = createAccountResponse;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -183,8 +214,9 @@ public class Stripe {
 				+ ", country=" + country + ", accessToken=" + accessToken
 				+ ", liveMode=" + liveMode + ", refreshToken=" + refreshToken
 				+ ", tokenType=" + tokenType + ", stripePublishableKey="
-				+ stripePublishableKey + ", stripeUserId=" + stripeUserId
-				+ ", scope=" + scope + "]";
+				+ stripePublishableKey + ", stripeSecretKey=" + stripeSecretKey
+				+ ", stripeUserId=" + stripeUserId + ", scope=" + scope
+				+ ", createAccountResponse=" + createAccountResponse + "]";
 	}
 
 	/* (non-Javadoc)
@@ -199,6 +231,10 @@ public class Stripe {
 		result = prime * result
 				+ ((accountId == null) ? 0 : accountId.hashCode());
 		result = prime * result + ((country == null) ? 0 : country.hashCode());
+		result = prime
+				* result
+				+ ((createAccountResponse == null) ? 0 : createAccountResponse
+						.hashCode());
 		result = prime * result
 				+ ((liveMode == null) ? 0 : liveMode.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -209,6 +245,8 @@ public class Stripe {
 				* result
 				+ ((stripePublishableKey == null) ? 0 : stripePublishableKey
 						.hashCode());
+		result = prime * result
+				+ ((stripeSecretKey == null) ? 0 : stripeSecretKey.hashCode());
 		result = prime * result
 				+ ((stripeUserId == null) ? 0 : stripeUserId.hashCode());
 		result = prime * result
@@ -252,6 +290,13 @@ public class Stripe {
 		} else if (!country.equals(other.country)) {
 			return false;
 		}
+		if (createAccountResponse == null) {
+			if (other.createAccountResponse != null) {
+				return false;
+			}
+		} else if (!createAccountResponse.equals(other.createAccountResponse)) {
+			return false;
+		}
 		if (liveMode == null) {
 			if (other.liveMode != null) {
 				return false;
@@ -285,6 +330,13 @@ public class Stripe {
 				return false;
 			}
 		} else if (!stripePublishableKey.equals(other.stripePublishableKey)) {
+			return false;
+		}
+		if (stripeSecretKey == null) {
+			if (other.stripeSecretKey != null) {
+				return false;
+			}
+		} else if (!stripeSecretKey.equals(other.stripeSecretKey)) {
 			return false;
 		}
 		if (stripeUserId == null) {

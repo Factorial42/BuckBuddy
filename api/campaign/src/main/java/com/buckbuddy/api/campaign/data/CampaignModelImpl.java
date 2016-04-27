@@ -3,6 +3,7 @@
  */
 package com.buckbuddy.api.campaign.data;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ import com.buckbuddy.core.utils.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rethinkdb.RethinkDB;
-import com.rethinkdb.model.MapObject;
 import com.rethinkdb.net.Connection;
 import com.rethinkdb.net.Cursor;
 
@@ -68,6 +68,7 @@ public class CampaignModelImpl implements CampaignModel {
 		campaign.setCreatedAt(OffsetDateTime.now());
 		campaign.setLastUpdatedAt(campaign.getCreatedAt());
 		campaign.setContributorsCount(0L);
+		campaign.setCollectedAmount(new BigDecimal(0));
 
 		Map<String, Object> campaignResponse, campaignWithSlugResponse, campaignSlugResponse;
 		;
@@ -398,4 +399,31 @@ public class CampaignModelImpl implements CampaignModel {
 			throw new CampaignDataException(CampaignDataException.DB_EXCEPTION);
 		}
 	}
+
+	@Override
+	public Map<String, Object> updateContributionsBySlug(String campaignSlug, Long donationAmount)
+			throws CampaignDataException {
+
+		// add validation
+		Map<String, Object> campaignMap = new HashMap<>();
+		campaignMap.put("lastUpdatedAt", OffsetDateTime.now());
+
+		Map<String, Object> campaignResponse;
+		try {
+			campaignResponse = rethinkDB
+					.table("campaign")
+					.filter(rethinkDB.hashMap("campaignSlug", campaignSlug))
+					.update(campaign -> rethinkDB.hashMap(
+							"collectedAmount",
+							campaign.g("collectedAmount").add(donationAmount)
+									.default_(0)).with("contributorsCount",
+							campaign.g("contributorsCount").add(1).default_(0)))
+					.run(conn);
+			return campaignResponse;
+		} catch (Exception e) {
+			LOG.error(CampaignDataException.DB_EXCEPTION, e);
+			throw new CampaignDataException(CampaignDataException.DB_EXCEPTION);
+		}
+	}
+
 }

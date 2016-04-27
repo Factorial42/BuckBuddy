@@ -22,18 +22,18 @@ public class PaymentProfiles {
 	}
 
 	/**
-	 * @return the partner
+	 * @return the stripe
 	 */
-	public Stripe getPartner() {
+	public Stripe getStripe() {
 		return stripe;
 	}
 
 	/**
-	 * @param partner
-	 *            the partner to set
+	 * @param stripe
+	 *            the stripe to set
 	 */
-	public void setPartner(Stripe partner) {
-		this.stripe = partner;
+	public void setStripe(Stripe stripe) {
+		this.stripe = stripe;
 	}
 
 	/* (non-Javadoc)
@@ -77,7 +77,7 @@ public class PaymentProfiles {
 	 */
 	@Override
 	public String toString() {
-		return "PaymentProfile [partner=" + stripe + "]";
+		return "PaymentProfile [stripe=" + stripe + "]";
 	}
 
 	/**

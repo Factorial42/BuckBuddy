@@ -114,13 +114,34 @@ public class UserRouter {
 						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 						String userSlug = req.params(":userSlug");
 
-						User user = userModelImpl.getByUserSlug(userSlug);
+						User user = userModelImpl.getByUserSlug(userSlug, Boolean.FALSE, Boolean.FALSE);
 						if (user != null) {
 							res.status(200);
 							res.type("application/json");
-							buckbuddyResponse.setData(mapper.convertValue(user,
-									ObjectNode.class));
+							return mapper.writeValueAsString(user);
+						} else {
+							res.status(404);
+							res.type("application/json");
 							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								UserDataException.UNKNOWN);
+					}
+				});
+		get("/users/bySlug/:userSlug/minified",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String userSlug = req.params(":userSlug");
+
+						User user = userModelImpl.getByUserSlug(userSlug, Boolean.TRUE, Boolean.TRUE);
+						if (user != null) {
+							res.status(200);
+							res.type("application/json");
+							return mapper.writeValueAsString(user);
 						} else {
 							res.status(404);
 							res.type("application/json");
@@ -793,30 +814,47 @@ public class UserRouter {
 
 					// get user
 					User userFromDB = userModelImpl.getById(userId);
-					JsonNode paymentStripeProfileNode = StripeUtil
-							.createManagedAccount(userFromDB.getEmail(),
-									STRIPE_BUSINESS_URL,
-									tosTimestampInMillis / 1000L, tosIP);
-					;
-					ObjectNode paymentProfileNode = mapper.createObjectNode();
-					paymentProfileNode.put("stripe", paymentStripeProfileNode);
+					
 					Map<String, Object> userMap = new HashMap<>();
 					userMap.put("userId", userId);
-					userMap.put("paymentProfiles", mapper.convertValue(paymentProfileNode, Map.class));
+					
+					JsonNode paymentStripeProfileNode = null;
+					try {
+						paymentStripeProfileNode = StripeUtil
+								.createManagedAccount(userFromDB.getEmail(),
+										STRIPE_BUSINESS_URL,
+										tosTimestampInMillis / 1000L, tosIP);
+						userMap = userModelImpl
+								.updateUserMapWithPaymentProfile(userMap,
+										paymentStripeProfileNode);
 
-					Map<String, Object> response = userModelImpl
-							.updatePartial(userMap);
+						Map<String, Object> response = userModelImpl
+								.updatePartial(userMap);
 
-					if (response != null
-							&& response.get("replaced") instanceof Long
-							&& ((Long) response.get("replaced")) > 0) {
-						res.status(204);
-						res.type("application/json");
-					} else if (response != null
-							&& response.get("errors") instanceof Long
-							&& ((Long) response.get("errors")) > 0) {
+						if (response != null
+								&& response.get("replaced") instanceof Long
+								&& ((Long) response.get("replaced")) > 0) {
+							res.status(204);
+							res.type("application/json");
+						} else if (response != null
+								&& response.get("errors") instanceof Long
+								&& ((Long) response.get("errors")) > 0) {
+							res.status(500);
+							res.type("application/json");
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"Could not update user with payment info"));
+						}
+
+					} catch (BuckBuddyException e) {
 						res.status(500);
 						res.type("application/json");
+						buckbuddyResponse
+								.setError(mapper
+										.createObjectNode()
+										.put("message", e.getMessage()));
 					}
 					return mapper.writeValueAsString(buckbuddyResponse);
 				});

@@ -42,7 +42,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.buckbuddy.api.donation.SparkJavaHelloWorld</mainClass>
+              <mainClass>com.buckbuddy.api.donation.DonationRouter</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -52,7 +52,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.4.0</version>
         <configuration>
-          <mainClass>com.buckbuddy.api.donation.SparkJavaHelloWorld</mainClass>
+          <mainClass>com.buckbuddy.api.donation.DonationRouter</mainClass>
         </configuration>
       </plugin>
       <plugin>
@@ -60,7 +60,7 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>1.2.4.RELEASE</version>
         <configuration>
-          <mainClass>com.buckbuddy.api.donation.SparkJavaHelloWorld</mainClass>
+          <mainClass>com.buckbuddy.api.donation.DonationRouter</mainClass>
         </configuration>
         <executions>
           <execution>
