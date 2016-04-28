@@ -20,6 +20,7 @@ public class Donation {
 	private BigDecimal amountInCents;
 	private Currency currency;
 	private String currencyString;
+	private BigDecimal applicationFeeCollected;
 	private String paymentToken; // token generated in front end by Stripe util
 	private String affiliateId;
 	
@@ -128,6 +129,18 @@ public class Donation {
 		this.currencyString = currencyString;
 	}
 	
+	/**
+	 * @return the applicationFeeCollected
+	 */
+	public BigDecimal getApplicationFeeCollected() {
+		return applicationFeeCollected;
+	}
+	/**
+	 * @param applicationFeeCollected the applicationFeeCollected to set
+	 */
+	public void setApplicationFeeCollected(BigDecimal applicationFeeCollected) {
+		this.applicationFeeCollected = applicationFeeCollected;
+	}
 	/**
 	 * @return the paymentToken
 	 */
@@ -369,17 +382,19 @@ public class Donation {
 		return "Donation [donationId=" + donationId + ", createdAt="
 				+ createdAt + ", lastUpdatedAt=" + lastUpdatedAt + ", ip=" + ip
 				+ ", amountInCents=" + amountInCents + ", currency=" + currency
-				+ ", currencyString=" + currencyString + ", paymentToken="
-				+ paymentToken + ", affiliateId=" + affiliateId + ", userId="
-				+ userId + ", userSlug=" + userSlug + ", campaignId="
-				+ campaignId + ", campaignSlug=" + campaignSlug
-				+ ", donorName=" + donorName + ", firstName=" + firstName
-				+ ", middleName=" + middleName + ", lastName=" + lastName
-				+ ", email=" + email + ", description=" + description
-				+ ", country=" + country + ", facebookHandle=" + facebookHandle
-				+ ", twitterHandle=" + twitterHandle + ", whatsappHandle="
-				+ whatsappHandle + ", smsHandle=" + smsHandle
-				+ ", chargeUserResponse=" + chargeUserResponse + "]";
+				+ ", currencyString=" + currencyString
+				+ ", applicationFeeCollected=" + applicationFeeCollected
+				+ ", paymentToken=" + paymentToken + ", affiliateId="
+				+ affiliateId + ", userId=" + userId + ", userSlug=" + userSlug
+				+ ", campaignId=" + campaignId + ", campaignSlug="
+				+ campaignSlug + ", donorName=" + donorName + ", firstName="
+				+ firstName + ", middleName=" + middleName + ", lastName="
+				+ lastName + ", email=" + email + ", description="
+				+ description + ", country=" + country + ", facebookHandle="
+				+ facebookHandle + ", twitterHandle=" + twitterHandle
+				+ ", whatsappHandle=" + whatsappHandle + ", smsHandle="
+				+ smsHandle + ", chargeUserResponse=" + chargeUserResponse
+				+ "]";
 	}
 	
 	/* (non-Javadoc)
@@ -393,6 +408,10 @@ public class Donation {
 				+ ((affiliateId == null) ? 0 : affiliateId.hashCode());
 		result = prime * result
 				+ ((amountInCents == null) ? 0 : amountInCents.hashCode());
+		result = prime
+				* result
+				+ ((applicationFeeCollected == null) ? 0
+						: applicationFeeCollected.hashCode());
 		result = prime * result
 				+ ((campaignId == null) ? 0 : campaignId.hashCode());
 		result = prime * result
@@ -467,6 +486,14 @@ public class Donation {
 				return false;
 			}
 		} else if (!amountInCents.equals(other.amountInCents)) {
+			return false;
+		}
+		if (applicationFeeCollected == null) {
+			if (other.applicationFeeCollected != null) {
+				return false;
+			}
+		} else if (!applicationFeeCollected
+				.equals(other.applicationFeeCollected)) {
 			return false;
 		}
 		if (campaignId == null) {

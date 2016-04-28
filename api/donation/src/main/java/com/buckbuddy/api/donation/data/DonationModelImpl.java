@@ -4,6 +4,8 @@
 package com.buckbuddy.api.donation.data;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rethinkdb.RethinkDB;
 import com.rethinkdb.net.Connection;
+import com.rethinkdb.net.Cursor;
 
 /**
  * @author jtandalai
@@ -65,6 +68,34 @@ public class DonationModelImpl implements DonationModel {
 						donationResponse.get("donationId"));
 			}
 			return donationResponse;
+		} catch (Exception e) {
+			LOG.error(DonationDataException.DB_EXCEPTION, e);
+			throw new DonationDataException(DonationDataException.DB_EXCEPTION);
+		}
+	}
+
+	@Override
+	public List<Donation> getByCreatedDatePaginated(String campaignSlug,
+			Integer pageNumber, Integer pageSize, Boolean descending)
+			throws DonationDataException {
+
+		try {
+			List<Donation> donations=new ArrayList<>();
+			Cursor cursor=null;
+			cursor = rethinkDB
+					.table("donation")
+					.orderBy()
+					.optArg("index",
+							descending ? rethinkDB.desc("createdAt")
+									: ("createdAt"))
+					.filter(rethinkDB.hashMap("campaignSlug", campaignSlug))
+					.slice(pageSize * (pageNumber - 1), pageSize * pageNumber)
+					.run(conn);
+			
+			while(cursor.hasNext()) {
+				donations.add(mapper.convertValue(cursor.next(), Donation.class));
+			}
+			return donations;
 		} catch (Exception e) {
 			LOG.error(DonationDataException.DB_EXCEPTION, e);
 			throw new DonationDataException(DonationDataException.DB_EXCEPTION);

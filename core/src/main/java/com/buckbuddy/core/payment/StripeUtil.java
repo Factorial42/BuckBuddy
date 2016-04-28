@@ -275,7 +275,7 @@ public class StripeUtil {
 		}
 	}
 
-	private static BigDecimal computeApplicationFeeInCents(BigDecimal amountInCents) {
+	public static BigDecimal computeApplicationFeeInCents(BigDecimal amountInCents) {
 		BigDecimal applicationFee = STRIPE_BASE_FIXED_CHARGE_IN_CENTS;
 		BigDecimal percentageAdds = STRIPE_BASE_PERCENTAGE_CHARGE_X_100
 				.add(BUCKBUDDY_BASE_FIXED_CHARGE_IN_PERCENTAGE_X_100);
@@ -381,15 +381,15 @@ public class StripeUtil {
 		// response = StripeUtil.getRefreshToken(refreshToken);
 		// System.out.println(response.toString());
 
-		StripeUtil.createManagedAccount("reddy@buckbuddy.com",
-				"http://dev.buckbuddy.com/reddy/campaign1",
-				(long) System.currentTimeMillis() / 1000L, "23.241.119.143");
+//		StripeUtil.createManagedAccount("reddy@buckbuddy.com",
+//				"http://dev.buckbuddy.com/reddy/campaign1",
+//				(long) System.currentTimeMillis() / 1000L, "23.241.119.143");
 
-		Token testToken = createTestCreditCardToken();
-		StripeUtil.chargeUser(testToken.getId(), new BigDecimal(100), "USD",
-				"test charge", "acct_183AFtIiad52S0yY");
+//		Token testToken = createTestCreditCardToken();
+//		StripeUtil.chargeUser(testToken.getId(), new BigDecimal(100), "USD",
+//				"test charge", "acct_183AFtIiad52S0yY");
 		
-		StripeUtil.retrieveBalance("acct_183AFtIiad52S0yY");
+		StripeUtil.retrieveBalance("acct_185I1wFCMDc5UxJ7");
 
 		Token testBAToken = createTestBankAccountToken();
 		updateManagedAccountWithBankAccountDetails("acct_183AFtIiad52S0yY",

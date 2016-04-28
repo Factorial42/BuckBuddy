@@ -1,8 +1,10 @@
 package com.buckbuddy.api.donation;
 
+import static spark.Spark.get;
 import static spark.Spark.post;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class DonationRouter {
@@ -161,14 +164,18 @@ public class DonationRouter {
 							.findPath("paymentProfiles").findPath("stripe")
 							.findPath("accountId").asText();
 					JsonNode chargeUserResponse = null;
+					BigDecimal applicationFeeCollected = null;
 
 					try {
+						// charge user
 						chargeUserResponse = StripeUtil.chargeUser(
 								donation.getPaymentToken(),
 								donation.getAmountInCents(),
 								donation.getCurrencyString(),
 								donation.getDescription(), connectedAccountId);
-
+						applicationFeeCollected = StripeUtil
+								.computeApplicationFeeInCents(donation
+										.getAmountInCents());
 						// if charge failed respond with exception
 					} catch (BuckBuddyException e) {
 						res.status(500);
@@ -182,6 +189,9 @@ public class DonationRouter {
 					LOG.info("Donation Response Log:",
 							chargeUserResponse.toString());
 					donation.setChargeUserResponse(chargeUserResponse);
+					if (applicationFeeCollected != null) {
+						donation.setApplicationFeeCollected(applicationFeeCollected);
+					}
 					// save donation details
 					Map<String, Object> response = donationModelImpl
 							.create(mapper.convertValue(donation, Map.class));
@@ -236,6 +246,52 @@ public class DonationRouter {
 				return mapper.writeValueAsString(buckbuddyResponse);
 			}
 		});
+
+		get("/donations/byCampaignSlug/:campaignSlug",
+				(req, res) -> {
+					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+					try {
+						Integer pageNumber = 0, pageSize = 10;
+
+						if (req.params(":campaignSlug") == null
+								|| req.params(":campaignSlug").isEmpty()) {
+							res.status(400);
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"campaignSlug in path param is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						String campaignSlug = req.params(":campaignSlug");
+						try {
+							pageNumber = Integer.parseInt(req
+									.queryParams("pageNumber"));
+							pageSize = Integer.parseInt(req
+									.queryParams("pageSize"));
+						} catch (NumberFormatException e) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"Bad input?"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						List<Donation> donations = donationModelImpl
+								.getByCreatedDatePaginated(campaignSlug,
+										pageNumber, pageSize, Boolean.FALSE);
+						res.status(200);
+						res.type("application/json");
+						return mapper.convertValue(donations, ArrayNode.class);
+					} catch (DonationDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						buckbuddyResponse.setError(mapper.createObjectNode()
+								.put("message", BuckBuddyException.UNKNOWN));
+						return mapper.writeValueAsString(buckbuddyResponse);
+					}
+				});
 	}
 
 	public static void main(String[] args) {

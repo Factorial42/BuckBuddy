@@ -1,9 +1,17 @@
 package com.buckbuddy.api.donation.data;
 
+import java.util.List;
 import java.util.Map;
+
+import com.buckbuddy.api.donation.data.model.Donation;
 
 public interface DonationModel {
 
-	Map<String, Object> create(Map<String, Object> donationMap) throws DonationDataException;
+	public Map<String, Object> create(Map<String, Object> donationMap)
+			throws DonationDataException;
+
+	public List<Donation> getByCreatedDatePaginated(String campaignSlug,
+			Integer pageNumber, Integer pageSize, Boolean descending)
+			throws DonationDataException;
 
 }

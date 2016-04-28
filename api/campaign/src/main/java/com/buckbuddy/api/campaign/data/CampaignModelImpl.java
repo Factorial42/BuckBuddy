@@ -271,8 +271,9 @@ public class CampaignModelImpl implements CampaignModel {
 				cursor = rethinkDB
 						.table("campaign")
 						.filter(rethinkDB.hashMap("campaignSlug", campaignSlug))
-						.pluck("campaignId", "name", "description", "amount", "profilePics", "userId")
-						.run(conn);
+						.pluck("campaignId", "name", "description", "amount",
+								"collectedAmount", "contributorsCount",
+								"profilePics", "userId").run(conn);
 			}
 
 			if (cursor.hasNext()) {

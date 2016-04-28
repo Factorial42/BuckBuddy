@@ -11,6 +11,8 @@ r.db('buckbuddy').table('campaign').indexCreate('userId');
 r.db('buckbuddy').tableCreate('campaignSlug', {primaryKey: 'campaignSlug'});
 
 r.db('buckbuddy').tableCreate('donation', {primaryKey: 'donationId'});
+r.db('buckbuddy').table('donation').indexCreate('createdAt');
+r.db('buckbuddy').table('donation').indexCreate('campaignSlug');
 
 # sample input
 ## user
