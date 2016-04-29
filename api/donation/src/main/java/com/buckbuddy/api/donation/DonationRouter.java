@@ -251,7 +251,7 @@ public class DonationRouter {
 				(req, res) -> {
 					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
 					try {
-						Integer pageNumber = 0, pageSize = 10;
+						Integer pageNumber = 1, pageSize = 5;
 
 						if (req.params(":campaignSlug") == null
 								|| req.params(":campaignSlug").isEmpty()) {
@@ -265,18 +265,39 @@ public class DonationRouter {
 							return mapper.writeValueAsString(buckbuddyResponse);
 						}
 						String campaignSlug = req.params(":campaignSlug");
-						try {
-							pageNumber = Integer.parseInt(req
-									.queryParams("pageNumber"));
-							pageSize = Integer.parseInt(req
-									.queryParams("pageSize"));
-						} catch (NumberFormatException e) {
-							res.status(400);
-							buckbuddyResponse.setError(mapper
-									.createObjectNode().put("message",
-											"Bad input?"));
-							res.type("application/json");
-							return mapper.writeValueAsString(buckbuddyResponse);
+						if (req.queryParams("pageNumber") != null
+								&& !req.queryParams("pageNumber").isEmpty()) {
+							try {
+								pageNumber = Integer.parseInt(req
+										.queryParams("pageNumber"));
+							} catch (NumberFormatException e) {
+								res.status(400);
+								buckbuddyResponse
+										.setError(mapper
+												.createObjectNode()
+												.put("message",
+														"If provided pageNumber should be positive integers. Default 1"));
+								res.type("application/json");
+								return mapper
+										.writeValueAsString(buckbuddyResponse);
+							}
+						}
+						if (req.queryParams("pageSize") != null
+								&& !req.queryParams("pageSize").isEmpty()) {
+							try {
+								pageSize = Integer.parseInt(req
+										.queryParams("pageSize"));
+							} catch (NumberFormatException e) {
+								res.status(400);
+								buckbuddyResponse
+										.setError(mapper
+												.createObjectNode()
+												.put("message",
+														"If provided pageSize should be positive integers. Default 5"));
+								res.type("application/json");
+								return mapper
+										.writeValueAsString(buckbuddyResponse);
+							}
 						}
 						List<Donation> donations = donationModelImpl
 								.getByCreatedDatePaginated(campaignSlug,
