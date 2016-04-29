@@ -302,16 +302,18 @@ public class DonationRouter {
 						}
 						Long count = donationModelImpl
 								.countByCampaignSlug(campaignSlug);
-						ObjectNode countNode = mapper.createObjectNode();
-						countNode.put("count", count);
+						ObjectNode responseNode = mapper.createObjectNode();
 						List<Donation> donations = donationModelImpl
-								.getByCampaignSlugOrderByCreatedDatePaginated(campaignSlug,
-										pageNumber, pageSize, Boolean.TRUE);
-						ArrayNode donationNodes = mapper.convertValue(donations, ArrayNode.class);
+								.getByCampaignSlugOrderByCreatedDatePaginated(
+										campaignSlug, pageNumber, pageSize,
+										Boolean.TRUE);
+						ArrayNode donationNodeArray = mapper.convertValue(
+								donations, ArrayNode.class);
 						res.status(200);
 						res.type("application/json");
-						donationNodes.add(countNode);
-						return donationNodes;
+						responseNode.put("donations", donationNodeArray);
+						responseNode.put("count", count);
+						return responseNode;
 					} catch (DonationDataException ude) {
 						res.status(500);
 						res.type("application/json");
