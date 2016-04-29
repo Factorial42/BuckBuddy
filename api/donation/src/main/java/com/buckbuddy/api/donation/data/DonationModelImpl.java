@@ -75,13 +75,13 @@ public class DonationModelImpl implements DonationModel {
 	}
 
 	@Override
-	public List<Donation> getByCreatedDatePaginated(String campaignSlug,
-			Integer pageNumber, Integer pageSize, Boolean descending)
-			throws DonationDataException {
+	public List<Donation> getByCampaignSlugOrderByCreatedDatePaginated(
+			String campaignSlug, Integer pageNumber, Integer pageSize,
+			Boolean descending) throws DonationDataException {
 
 		try {
-			List<Donation> donations=new ArrayList<>();
-			Cursor cursor=null;
+			List<Donation> donations = new ArrayList<>();
+			Cursor cursor = null;
 			cursor = rethinkDB
 					.table("donation")
 					.orderBy()
@@ -91,11 +91,28 @@ public class DonationModelImpl implements DonationModel {
 					.filter(rethinkDB.hashMap("campaignSlug", campaignSlug))
 					.slice(pageSize * (pageNumber - 1), pageSize * pageNumber)
 					.run(conn);
-			
-			while(cursor.hasNext()) {
-				donations.add(mapper.convertValue(cursor.next(), Donation.class));
+
+			while (cursor.hasNext()) {
+				donations
+						.add(mapper.convertValue(cursor.next(), Donation.class));
 			}
 			return donations;
+		} catch (Exception e) {
+			LOG.error(DonationDataException.DB_EXCEPTION, e);
+			throw new DonationDataException(DonationDataException.DB_EXCEPTION);
+		}
+	}
+
+	@Override
+	public Long countByCampaignSlug(String campaignSlug)
+			throws DonationDataException {
+
+		try {
+			Object count = rethinkDB.table("donation")
+					.filter(rethinkDB.hashMap("campaignSlug", campaignSlug))
+					.count().run(conn);
+
+			return (Long) count;
 		} catch (Exception e) {
 			LOG.error(DonationDataException.DB_EXCEPTION, e);
 			throw new DonationDataException(DonationDataException.DB_EXCEPTION);

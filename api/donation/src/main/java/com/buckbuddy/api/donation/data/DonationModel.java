@@ -10,8 +10,11 @@ public interface DonationModel {
 	public Map<String, Object> create(Map<String, Object> donationMap)
 			throws DonationDataException;
 
-	public List<Donation> getByCreatedDatePaginated(String campaignSlug,
-			Integer pageNumber, Integer pageSize, Boolean descending)
+	public List<Donation> getByCampaignSlugOrderByCreatedDatePaginated(
+			String campaignSlug, Integer pageNumber, Integer pageSize,
+			Boolean descending) throws DonationDataException;
+
+	public Long countByCampaignSlug(String campaignSlug)
 			throws DonationDataException;
 
 }

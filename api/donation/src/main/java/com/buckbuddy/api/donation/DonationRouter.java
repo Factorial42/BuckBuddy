@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class DonationRouter {
@@ -299,12 +300,18 @@ public class DonationRouter {
 										.writeValueAsString(buckbuddyResponse);
 							}
 						}
+						Long count = donationModelImpl
+								.countByCampaignSlug(campaignSlug);
+						ObjectNode countNode = mapper.createObjectNode();
+						countNode.put("count", count);
 						List<Donation> donations = donationModelImpl
-								.getByCreatedDatePaginated(campaignSlug,
+								.getByCampaignSlugOrderByCreatedDatePaginated(campaignSlug,
 										pageNumber, pageSize, Boolean.TRUE);
+						ArrayNode donationNodes = mapper.convertValue(donations, ArrayNode.class);
 						res.status(200);
 						res.type("application/json");
-						return mapper.convertValue(donations, ArrayNode.class);
+						donationNodes.add(countNode);
+						return donationNodes;
 					} catch (DonationDataException ude) {
 						res.status(500);
 						res.type("application/json");
