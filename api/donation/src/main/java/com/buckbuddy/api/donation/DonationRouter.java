@@ -280,7 +280,7 @@ public class DonationRouter {
 						}
 						List<Donation> donations = donationModelImpl
 								.getByCreatedDatePaginated(campaignSlug,
-										pageNumber, pageSize, Boolean.FALSE);
+										pageNumber, pageSize, Boolean.TRUE);
 						res.status(200);
 						res.type("application/json");
 						return mapper.convertValue(donations, ArrayNode.class);
