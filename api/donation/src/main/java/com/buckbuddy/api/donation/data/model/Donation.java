@@ -42,6 +42,7 @@ public class Donation {
 	private String whatsappHandle;
 	private String smsHandle;
 	private JsonNode chargeUserResponse;
+	private String donorProfilePic;
 
 	
 	/**
@@ -363,6 +364,18 @@ public class Donation {
 	}
 	
 	/**
+	 * @return the profilePic
+	 */
+	public String getDonorProfilePic() {
+		return donorProfilePic;
+	}
+	/**
+	 * @param profilePic the profilePic to set
+	 */
+	public void setDonorProfilePic(String donorProfilePic) {
+		this.donorProfilePic = donorProfilePic;
+	}
+	/**
 	 * @return the campaignId
 	 */
 	public String getCampaignId() {
@@ -394,7 +407,7 @@ public class Donation {
 				+ facebookHandle + ", twitterHandle=" + twitterHandle
 				+ ", whatsappHandle=" + whatsappHandle + ", smsHandle="
 				+ smsHandle + ", chargeUserResponse=" + chargeUserResponse
-				+ "]";
+				+ ", profilePic=" + donorProfilePic + "]";
 	}
 	
 	/* (non-Javadoc)
@@ -447,6 +460,8 @@ public class Donation {
 				+ ((middleName == null) ? 0 : middleName.hashCode());
 		result = prime * result
 				+ ((paymentToken == null) ? 0 : paymentToken.hashCode());
+		result = prime * result
+				+ ((donorProfilePic == null) ? 0 : donorProfilePic.hashCode());
 		result = prime * result
 				+ ((smsHandle == null) ? 0 : smsHandle.hashCode());
 		result = prime * result
@@ -620,6 +635,13 @@ public class Donation {
 				return false;
 			}
 		} else if (!paymentToken.equals(other.paymentToken)) {
+			return false;
+		}
+		if (donorProfilePic == null) {
+			if (other.donorProfilePic != null) {
+				return false;
+			}
+		} else if (!donorProfilePic.equals(other.donorProfilePic)) {
 			return false;
 		}
 		if (smsHandle == null) {
