@@ -192,6 +192,37 @@ public class UserRouter {
 								UserDataException.UNKNOWN);
 					}
 				});
+		get("/users/byToken/:token/verificationieldsNeeded",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token = req.params(":token");
+						if(token==null || token.isEmpty()) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper.createObjectNode().put(
+									"message", "Token is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						String userId = JJWTUtil.getSubject(token);
+						JsonNode fieldsNeeded = userModelImpl
+								.getVerificationFieldsNeededForId(userId);
+						if (fieldsNeeded != null) {
+							res.status(200);
+							res.type("application/json");
+							return mapper.writeValueAsString(fieldsNeeded);
+						} else {
+							res.status(404);
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								UserDataException.UNKNOWN);
+					}
+				});
 		get("/users/email/:email",
 				(req, res) -> {
 					try {
@@ -276,6 +307,129 @@ public class UserRouter {
 							res.type("application/json");
 						}
 						return mapper.writeValueAsString(response);
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								UserDataException.UNKNOWN);
+					}
+				});
+		patch("/users/byToken/:token/fieldsNeeded",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token = req.params(":token");
+						if (token == null || token.isEmpty()) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"Token is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						Map<String, Object> userMap = mapper.readValue(
+								req.body(), Map.class);
+						String userId = JJWTUtil.getSubject(token);
+						userMap.put("userId", userId);
+
+						if (userMap.get("external_account") == null
+								|| userMap.get("external_account").toString()
+										.isEmpty()
+								|| userMap.get("legal_entity.dob.day") == null
+								|| userMap.get("legal_entity.dob.day")
+										.toString().isEmpty()
+								|| userMap.get("legal_entity.dob.month") == null
+								|| userMap.get("legal_entity.dob.month")
+										.toString().isEmpty()
+								|| userMap.get("legal_entity.dob.year") == null
+								|| userMap.get("legal_entity.dob.year")
+										.toString().isEmpty()
+								|| userMap.get("legal_entity.first_name") == null
+								|| userMap.get("legal_entity.first_name")
+										.toString().isEmpty()
+								|| userMap.get("legal_entity.last_name") == null
+								|| userMap.get("legal_entity.last_name")
+										.toString().isEmpty()) {
+							res.status(400);
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"Bad nessage some fields are missing. DOB day, month and year. Legal First name and Last name with Bank account token are all required"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						User user = userModelImpl.getById(userId, Boolean.FALSE, Boolean.FALSE);
+						if (user == null) {
+							LOG.debug("User not found");
+							res.status(404);
+							res.type("application/json");
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"User not found"));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						if (user.getPaymentProfiles() == null
+								|| user.getPaymentProfiles().getStripe() == null
+								|| user.getPaymentProfiles().getStripe()
+										.getAccountId() == null) {
+							LOG.debug("User Stripe account details do not exist id:{}", userId);
+							res.status(404);
+							res.type("application/json");
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"User Stripe account details do not exist"));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						JsonNode stripeAccountNode = StripeUtil
+								.updateManagedAccountWithBankAccountAndLegalEntity(
+										user.getPaymentProfiles().getStripe()
+												.getAccountId(),
+										userMap.get("external_account")
+												.toString(),
+										userMap.get("legal_entity.dob.day")
+												.toString(),
+										userMap.get("legal_entity.dob.month")
+												.toString(),
+										userMap.get("legal_entity.dob.year")
+												.toString(),
+										userMap.get("legal_entity.first_name")
+												.toString(),
+										userMap.get("legal_entity.last_name")
+												.toString(), "individual");
+						if(stripeAccountNode==null) {
+							res.status(500);
+							res.type("application/json");
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"Could not update user with payment info"));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						userMap = userModelImpl
+								.updateUserMapWithPaymentProfile(userMap,
+										stripeAccountNode);
+
+						Map<String, Object> response = userModelImpl
+								.updatePartial(userMap);
+
+						if (response != null
+								&& response.get("replaced") instanceof Long
+								&& ((Long) response.get("replaced")) > 0) {
+							res.status(204);
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						} else {
+							res.status(500);
+							res.type("application/json");
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"Could not update user with payment info"));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
 					} catch (UserDataException ude) {
 						res.status(500);
 						res.type("application/json");

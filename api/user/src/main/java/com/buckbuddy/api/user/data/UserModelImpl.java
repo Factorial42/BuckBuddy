@@ -12,6 +12,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.buckbuddy.api.user.data.model.PaymentProfiles;
+import com.buckbuddy.api.user.data.model.Stripe;
 import com.buckbuddy.api.user.data.model.User;
 import com.buckbuddy.api.user.data.model.UserSlug;
 import com.buckbuddy.core.exceptions.BuckBuddyException;
@@ -19,6 +21,7 @@ import com.buckbuddy.core.security.SecurityUtil;
 import com.buckbuddy.core.utils.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rethinkdb.RethinkDB;
@@ -253,6 +256,43 @@ public class UserModelImpl implements UserModel {
 	@Override
 	public User getById(String userId) throws UserDataException {
 		return getById(userId, Boolean.TRUE, Boolean.FALSE);
+	}
+
+	@Override
+	public JsonNode getVerificationFieldsNeededForId(String userId)
+			throws UserDataException {
+		User user = getById(userId, Boolean.FALSE, Boolean.FALSE);
+		JsonNode fieldsNeeded = null;
+		if (user.getPaymentProfiles() != null) {
+			PaymentProfiles paymentProfiles = user.getPaymentProfiles();
+			if (paymentProfiles.getStripe() != null) {
+				Stripe stripe = paymentProfiles.getStripe();
+				if (stripe.getCreateAccountResponse() != null) {
+					JsonNode createAccountResponse = stripe
+							.getCreateAccountResponse();
+					if (!createAccountResponse.isMissingNode()
+							&& !createAccountResponse.get("verification")
+									.isMissingNode()
+							&& !createAccountResponse.get("verification")
+									.findPath("fieldsNeeded").isMissingNode()) {
+						fieldsNeeded = createAccountResponse.get(
+								"verification").findPath("fieldsNeeded");
+						int typeEntryIndex = -1;
+						ArrayNode fieldsNeededArray = ((ArrayNode) fieldsNeeded);
+						for (int i = 0; i < fieldsNeededArray.size(); i++) {
+							if (fieldsNeededArray.get(i).asText()
+									.equalsIgnoreCase("legal_entity.type")) {
+								typeEntryIndex = i;
+							}
+						}
+						if (typeEntryIndex > -1) {
+							fieldsNeededArray.remove(typeEntryIndex);
+						}
+					}
+				}
+			}
+		}
+		return fieldsNeeded;
 	}
 
 	@Override

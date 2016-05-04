@@ -33,6 +33,7 @@ import com.stripe.model.Charge;
 import com.stripe.model.Token;
 import com.stripe.model.Transfer;
 import com.stripe.net.RequestOptions;
+import com.stripe.net.RequestOptions.RequestOptionsBuilder;
 
 /**
  * @author jtandalai
@@ -90,7 +91,8 @@ public class StripeUtil {
 	 * ​
 	 */
 	public static JsonNode createManagedAccount(String email,
-			String businessUrl, Long tosAcceptanceDate, String tosAcceptanceIP) throws BuckBuddyException {
+			String businessUrl, Long tosAcceptanceDate, String tosAcceptanceIP)
+			throws BuckBuddyException {
 
 		Account managedAccount = null;
 		Stripe.apiKey = SECRET_KEY;
@@ -125,7 +127,11 @@ public class StripeUtil {
 		 */
 		Stripe.apiKey = SECRET_KEY;
 		try {
-			Balance balance = Balance.retrieve();
+			RequestOptions options = new RequestOptionsBuilder()
+					.setApiKey(Stripe.apiKey).setStripeAccount(accountId)
+					.build();
+
+			Balance balance = Balance.retrieve(options);
 			System.out.println(balance.toString());
 		} catch (AuthenticationException | InvalidRequestException
 				| APIConnectionException | CardException | APIException e) {
@@ -176,9 +182,10 @@ public class StripeUtil {
 		}
 	}
 
-	public static void updateManagedAccountWithLegalEntity(
-			String connectedStripeAccountId, String dobDay, String dobMonth,
-			String dobYear, String firstName, String lastName, String type) {
+	public static JsonNode updateManagedAccountWithBankAccountAndLegalEntity(
+			String connectedStripeAccountId, String bankAccountToken,
+			String dobDay, String dobMonth, String dobYear, String firstName,
+			String lastName, String type) throws BuckBuddyException {
 		// external_account
 
 		Stripe.apiKey = SECRET_KEY;
@@ -186,6 +193,9 @@ public class StripeUtil {
 		try {
 			account = Account.retrieve(connectedStripeAccountId, null);
 			if (account != null) {
+				Map<String, Object> accountParams = new HashMap<String, Object>();
+				accountParams.put("external_account", bankAccountToken);
+
 				Map<String, Object> dobParams = new HashMap<String, Object>();
 				dobParams.put("day", dobDay);
 				dobParams.put("month", dobMonth);
@@ -197,14 +207,16 @@ public class StripeUtil {
 				legalEntitiesParams.put("last_name", lastName);
 				legalEntitiesParams.put("type", type);
 
-				Map<String, Object> accountParams = new HashMap<String, Object>();
 				accountParams.put("legal_entity", legalEntitiesParams);
-				account.update(accountParams);
+				account= account.update(accountParams);
+				return mapper.convertValue(account, JsonNode.class);
 			}
 		} catch (AuthenticationException | InvalidRequestException
 				| APIConnectionException | CardException | APIException e) {
-			LOG.error("Error in retrieving account info", e);
+			LOG.error("Error in updating account info", e);
+			throw new BuckBuddyException("Error in updating account info.", e);
 		}
+		return null;
 	}
 
 	public static void transferToBankAccount(String connectedStripeAccountId,
@@ -236,7 +248,8 @@ public class StripeUtil {
 	}
 
 	public static JsonNode chargeUser(String token, BigDecimal amountInCents,
-			String currency, String description, String connectedAccountId) throws BuckBuddyException {
+			String currency, String description, String connectedAccountId)
+			throws BuckBuddyException {
 		/*
 		 * //Charge a user curl https://api.stripe.com/v1/charges -u
 		 * _test_EGU9Ur5y4V8vJIkFZPLa81xU: \ -d amount=40 -d currency=usd -d
@@ -255,7 +268,8 @@ public class StripeUtil {
 			BigDecimal applicationFeeInCents = computeApplicationFeeInCents(amountInCents);
 			// if both amount and app fee are two decimals, amount to charge
 			// should also end up in max two decimals
-			BigDecimal amountToCharge = amountInCents.subtract(applicationFeeInCents);
+			BigDecimal amountToCharge = amountInCents
+					.subtract(applicationFeeInCents);
 			Map<String, Object> chargeParams = new HashMap<String, Object>();
 
 			chargeParams.put("amount", amountInCents);
@@ -263,7 +277,8 @@ public class StripeUtil {
 			chargeParams.put("source", token);
 			chargeParams.put("description", description);
 			chargeParams.put("destination", connectedAccountId);
-			chargeParams.put("application_fee", applicationFeeInCents.toString());
+			chargeParams.put("application_fee",
+					applicationFeeInCents.toString());
 
 			Charge charge = Charge.create(chargeParams);
 			return mapper.convertValue(charge, JsonNode.class);
@@ -275,7 +290,8 @@ public class StripeUtil {
 		}
 	}
 
-	public static BigDecimal computeApplicationFeeInCents(BigDecimal amountInCents) {
+	public static BigDecimal computeApplicationFeeInCents(
+			BigDecimal amountInCents) {
 		BigDecimal applicationFee = STRIPE_BASE_FIXED_CHARGE_IN_CENTS;
 		BigDecimal percentageAdds = STRIPE_BASE_PERCENTAGE_CHARGE_X_100
 				.add(BUCKBUDDY_BASE_FIXED_CHARGE_IN_PERCENTAGE_X_100);
@@ -372,7 +388,7 @@ public class StripeUtil {
 
 	/**
 	 * @param args
-	 * @throws BuckBuddyException 
+	 * @throws BuckBuddyException
 	 */
 	public static void main(String[] args) throws BuckBuddyException {
 		// JsonNode response = StripeUtil
@@ -381,22 +397,23 @@ public class StripeUtil {
 		// response = StripeUtil.getRefreshToken(refreshToken);
 		// System.out.println(response.toString());
 
-//		StripeUtil.createManagedAccount("reddy@buckbuddy.com",
-//				"http://dev.buckbuddy.com/reddy/campaign1",
-//				(long) System.currentTimeMillis() / 1000L, "23.241.119.143");
+		StripeUtil.createManagedAccount("reddy@buckbuddy.com",
+				"http://dev.buckbuddy.com/reddy/campaign1",
+				(long) System.currentTimeMillis() / 1000L, "23.241.119.143");
 
-//		Token testToken = createTestCreditCardToken();
-//		StripeUtil.chargeUser(testToken.getId(), new BigDecimal(100), "USD",
-//				"test charge", "acct_183AFtIiad52S0yY");
-		
+		Token testToken = createTestCreditCardToken();
+		StripeUtil.chargeUser(testToken.getId(), new BigDecimal(100), "USD",
+				"test charge", "acct_183AFtIiad52S0yY");
+
 		StripeUtil.retrieveBalance("acct_185I1wFCMDc5UxJ7");
 
 		Token testBAToken = createTestBankAccountToken();
 		updateManagedAccountWithBankAccountDetails("acct_183AFtIiad52S0yY",
 				testBAToken.getId());
-
-		updateManagedAccountWithLegalEntity("acct_183AFtIiad52S0yY", "1", "1",
-				"1973", "Test", "Buddy", "individual");
+		testBAToken = createTestBankAccountToken();
+		updateManagedAccountWithBankAccountAndLegalEntity(
+				"acct_183AFtIiad52S0yY", testBAToken.getId(), "1", "1", "1973",
+				"Test", "Buddy", "individual");
 
 		System.out.println(computeApplicationFeeInCents(new BigDecimal(100)));
 	}

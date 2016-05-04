@@ -113,6 +113,29 @@ Date: Mon, 25 Apr 2016 22:13:07 GMT
 Content-Type: application/json
 Server: Jetty(9.3.2.v20150730)
 
+## Get user payment profile fields needed to complete Stripe account
+Req:
+curl -i -XGET 'localhost:4567/users/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA/verificationieldsNeeded'
+
+Res:
+HTTP/1.1 200 OK
+Date: Wed, 04 May 2016 18:49:55 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+["external_account","legal_entity.dob.day","legal_entity.dob.month","legal_entity.dob.year","legal_entity.first_name","legal_entity.last_name"]
+
+## Update Stripe Profile fields needed
+Req:
+curl -i -XPATCH 'localhost:4567/users/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA/fieldsNeeded' -d '{"external_account":"btok_8OI8AuiBCEWHQg","legal_entity.dob.day":"13","legal_entity.dob.month":"02","legal_entity.dob.year":"1972","legal_entity.first_name":"Test","legal_entity.last_name":"User"}'
+
+Res:
+HTTP/1.1 204 No Content
+Date: Wed, 04 May 2016 19:21:27 GMT
+Content-Type: application/json
+Server: Jetty(9.3.2.v20150730)
+
 ## Activate user
 Req:
 curl -i -XPATCH 'localhost:4567/users/:token/activate'

@@ -131,4 +131,7 @@ public interface UserModel {
 
 	public Map<String, Object> updateUserMapWithPaymentProfile(
 			Map<String, Object> userMap, JsonNode paymentStripeProfileNode);
+
+	public JsonNode getVerificationFieldsNeededForId(String userId)
+			throws UserDataException;
 }
