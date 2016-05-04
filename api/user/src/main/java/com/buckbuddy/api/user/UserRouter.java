@@ -223,6 +223,39 @@ public class UserRouter {
 								UserDataException.UNKNOWN);
 					}
 				});
+		get("/users/byToken/:token/isTransfersEnabled",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token = req.params(":token");
+						if (token == null || token.isEmpty()) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"Token is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						String userId = JJWTUtil.getSubject(token);
+						Boolean isTransfersEnabled = userModelImpl
+								.isTransfersEnabled(userId);
+						if (isTransfersEnabled != null) {
+							res.status(200);
+							res.type("application/json");
+							return mapper.createObjectNode().put(
+									"isTransfersEnabled", isTransfersEnabled);
+						} else {
+							res.status(404);
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								UserDataException.UNKNOWN);
+					}
+				});
 		get("/users/email/:email",
 				(req, res) -> {
 					try {

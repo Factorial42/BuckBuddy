@@ -134,4 +134,7 @@ public interface UserModel {
 
 	public JsonNode getVerificationFieldsNeededForId(String userId)
 			throws UserDataException;
+	
+	public Boolean isTransfersEnabled(String userId)
+			throws UserDataException;
 }

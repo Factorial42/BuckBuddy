@@ -136,6 +136,19 @@ Date: Wed, 04 May 2016 19:21:27 GMT
 Content-Type: application/json
 Server: Jetty(9.3.2.v20150730)
 
+## Check if transfers is enabled for user
+Req:
+curl -i -XGET 'localhost:4567/users/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA/isTransfersEnabled'
+
+Res:
+HTTP/1.1 200 OK
+Date: Wed, 04 May 2016 22:28:46 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"isTransfersEnabled":true}
+
 ## Activate user
 Req:
 curl -i -XPATCH 'localhost:4567/users/:token/activate'

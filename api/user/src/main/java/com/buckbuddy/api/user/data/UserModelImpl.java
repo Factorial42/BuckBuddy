@@ -296,6 +296,32 @@ public class UserModelImpl implements UserModel {
 	}
 
 	@Override
+	public Boolean isTransfersEnabled(String userId)
+			throws UserDataException {
+		User user = getById(userId, Boolean.FALSE, Boolean.FALSE);
+		if(user==null) {
+			return null;
+		}
+		Boolean isTransfersEnabled = Boolean.FALSE;
+		if (user.getPaymentProfiles() != null) {
+			PaymentProfiles paymentProfiles = user.getPaymentProfiles();
+			if (paymentProfiles.getStripe() != null) {
+				Stripe stripe = paymentProfiles.getStripe();
+				if (stripe.getCreateAccountResponse() != null) {
+					JsonNode createAccountResponse = stripe
+							.getCreateAccountResponse();
+					if (!createAccountResponse.isMissingNode()) {
+						isTransfersEnabled = createAccountResponse.get(
+								"transfersEnabled").asBoolean();
+						return isTransfersEnabled;
+					}
+				}
+			}
+		}
+		return isTransfersEnabled;
+	}
+
+	@Override
 	public User getByFBId(String fbId) throws UserDataException {
 		Map<String, Object> userResponse = new HashMap<>();
 		;
