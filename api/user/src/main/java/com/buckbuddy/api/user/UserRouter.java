@@ -774,6 +774,66 @@ public class UserRouter {
 								UserDataException.UNKNOWN);
 					}
 				});
+		get("/users/byToken/:token/balance",
+				(req, res) -> {
+					try {
+						BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+						String token = req.params(":token");
+						if (token == null || token.isEmpty()) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"Token is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						String userId = JJWTUtil.getSubject(token);
+						if (userId == null) {
+							res.status(401);
+							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"Valid Token is required.");
+						}
+
+						User user = userModelImpl.getById(userId, Boolean.FALSE, Boolean.FALSE);
+						if (user == null) {
+							res.status(404);
+							res.type("application/json");
+							return mapper.createObjectNode().put("error",
+									"User not found.");
+						}
+						if (user.getPaymentProfiles() == null
+								|| user.getPaymentProfiles().getStripe() == null
+								|| user.getPaymentProfiles().getStripe()
+										.getAccountId() == null) {
+							LOG.debug(
+									"User Stripe account details do not exist for id:{}",
+									userId);
+							res.status(404);
+							res.type("application/json");
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"User Stripe account details do not exist"));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						String connectedStripeAccountId = user
+								.getPaymentProfiles().getStripe()
+								.getAccountId();
+						JsonNode balanceResponseNode = StripeUtil
+								.retrieveBalance(connectedStripeAccountId);
+						res.status(200);
+						res.type("application/json");
+						return mapper.writeValueAsString(balanceResponseNode);
+						
+					} catch (UserDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						return mapper.createObjectNode().put("error",
+								UserDataException.UNKNOWN);
+					}
+				});
 		post("/users/:userId/uploadProfilePic", "multipart/form-data", (req,
 				res) -> {
 			BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
