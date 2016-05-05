@@ -159,6 +159,19 @@ Date: Thu, 05 May 2016 17:12:22 GMT
 Content-Type: application/json
 Server: Jetty(9.3.2.v20150730)
 
+## Get balance
+Req:
+curl -i -XGET 'localhost:4567/users/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA/balance'
+
+Res:
+HTTP/1.1 200 OK
+Date: Thu, 05 May 2016 19:43:37 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty(9.3.2.v20150730)
+
+{"livemode":false,"pending":[{"amount":1145,"currency":"usd"}],"available":[{"amount":886,"currency":"usd"}]}
+
 ## Activate user
 Req:
 curl -i -XPATCH 'localhost:4567/users/:token/activate'
