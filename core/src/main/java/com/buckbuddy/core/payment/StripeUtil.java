@@ -120,7 +120,7 @@ public class StripeUtil {
 		}
 	}
 
-	public static void retrieveBalance(String accountId) {
+	public static JsonNode retrieveBalance(String accountId) throws BuckBuddyException {
 		/*
 		 * curl https://api.stripe.com/v1/balance -u
 		 * sk_test_EGU9Ur5y4V8vJIkFZPLa81xU: ​
@@ -132,10 +132,11 @@ public class StripeUtil {
 					.build();
 
 			Balance balance = Balance.retrieve(options);
-			System.out.println(balance.toString());
+			return mapper.convertValue(balance, JsonNode.class);
 		} catch (AuthenticationException | InvalidRequestException
 				| APIConnectionException | CardException | APIException e) {
-			LOG.error("Error in retrieving account balance for", e);
+			LOG.error("Error in retrieving account balance for {}", accountId, e);
+			throw new BuckBuddyException("Error in retrieving account balance  "+accountId, e);
 		}
 	}
 
@@ -219,8 +220,8 @@ public class StripeUtil {
 		return null;
 	}
 
-	public static void transferToBankAccount(String connectedStripeAccountId,
-			String amount, String currency) {
+	public static JsonNode transferToBankAccount(String connectedStripeAccountId,
+			BigDecimal amountInCents, String currency) throws BuckBuddyException {
 		/*
 		 * 
 		 * transfer from managed account to bank account curl
@@ -234,16 +235,18 @@ public class StripeUtil {
 				.setStripeAccount(connectedStripeAccountId).build();
 
 		Map<String, Object> transferParams = new HashMap<String, Object>();
-		transferParams.put("amount", amount);
+		transferParams.put("amount", amountInCents);
 		transferParams.put("currency", currency);
 		transferParams.put("destination", "default_for_currency");
 
 		try {
-			Transfer.create(transferParams, requestOptions);
+			Transfer transferResponse = Transfer.create(transferParams, requestOptions);
+			return mapper.convertValue(transferResponse, JsonNode.class);
 		} catch (AuthenticationException | InvalidRequestException
 				| APIConnectionException | CardException | APIException e) {
 			LOG.error("Error in transfer to account:{}",
 					connectedStripeAccountId, e);
+			throw new BuckBuddyException("Error in transfering to:"+connectedStripeAccountId, e);
 		}
 	}
 
@@ -348,7 +351,7 @@ public class StripeUtil {
 		Map<String, Object> params = new HashMap<>();
 		Map<String, Object> ccParams = new HashMap<>();
 
-		ccParams.put("number", "4242424242424242");
+		ccParams.put("number", "4000000000000077");
 		ccParams.put("exp_month", 1);
 		ccParams.put("exp_year", 2017);
 		ccParams.put("cvc", 314);
@@ -402,10 +405,10 @@ public class StripeUtil {
 				(long) System.currentTimeMillis() / 1000L, "23.241.119.143");
 
 		Token testToken = createTestCreditCardToken();
-		StripeUtil.chargeUser(testToken.getId(), new BigDecimal(100), "USD",
-				"test charge", "acct_183AFtIiad52S0yY");
+		StripeUtil.chargeUser(testToken.getId(), new BigDecimal(1000), "USD",
+				"test charge", "acct_184xd4JL16Rlwnz1");
 
-		StripeUtil.retrieveBalance("acct_185I1wFCMDc5UxJ7");
+		StripeUtil.retrieveBalance("acct_184xd4JL16Rlwnz1");
 
 		Token testBAToken = createTestBankAccountToken();
 		updateManagedAccountWithBankAccountDetails("acct_183AFtIiad52S0yY",

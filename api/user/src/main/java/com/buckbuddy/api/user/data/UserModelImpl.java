@@ -548,4 +548,18 @@ public class UserModelImpl implements UserModel {
 		
 		return userMap;
 	}
+
+	@Override
+	public Map<String, Object> updateUserMapWithBalanceResponse(
+			Map<String, Object> userMap, JsonNode banlanceResponseNode) {
+		ObjectNode paymentProfileNode = mapper.createObjectNode();
+		ObjectNode balanceResponse=mapper.createObjectNode();
+		balanceResponse.put("balanceResponse", banlanceResponseNode);
+
+		paymentProfileNode.put(
+				"stripe", balanceResponse);
+		userMap.put("paymentProfiles", mapper.convertValue(paymentProfileNode, Map.class));
+		
+		return userMap;
+	}
 }

@@ -115,7 +115,7 @@ Server: Jetty(9.3.2.v20150730)
 
 ## Get user payment profile fields needed to complete Stripe account
 Req:
-curl -i -XGET 'localhost:4567/users/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA/verificationieldsNeeded'
+curl -i -XGET 'localhost:4567/users/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA/verificationFieldsNeeded'
 
 Res:
 HTTP/1.1 200 OK
@@ -148,6 +148,16 @@ Transfer-Encoding: chunked
 Server: Jetty(9.3.2.v20150730)
 
 {"isTransfersEnabled":true}
+
+## Transfer amountInCents
+Req:
+curl -i -XPOST 'localhost:4567/users/byToken/eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlYzY3OTc4MzIyZTVmYmQ3NjA0ZThkYjJhZDBlODlhYjFmYzRiN2RlZTBhOWE5NjU1ZmI2NjJiOGFlNjQ3ZTcxIn0.gAarGBEnQf11oc8h2bfyaiLoBYGOiaj_Lrjb-KV_SL5GZECE7j50wegLkI7ea1RfNAZBhFFa6LV4IPJQ7I3rjA/cashout?currencyString=usd&amountInCents=5'
+
+Res:
+HTTP/1.1 204 No Content
+Date: Thu, 05 May 2016 17:12:22 GMT
+Content-Type: application/json
+Server: Jetty(9.3.2.v20150730)
 
 ## Activate user
 Req:

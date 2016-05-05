@@ -25,6 +25,7 @@ public class Stripe {
 	private String stripeUserId;
 	private String scope;
 	private JsonNode createAccountResponse;
+	private JsonNode balanceResponse;
 
 
 	/**
@@ -205,6 +206,20 @@ public class Stripe {
 		this.createAccountResponse = createAccountResponse;
 	}
 
+	/**
+	 * @return the balanceResponse
+	 */
+	public JsonNode getBalanceResponse() {
+		return balanceResponse;
+	}
+
+	/**
+	 * @param balanceResponse the balanceResponse to set
+	 */
+	public void setBalanceResponse(JsonNode balanceResponse) {
+		this.balanceResponse = balanceResponse;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -216,7 +231,8 @@ public class Stripe {
 				+ ", tokenType=" + tokenType + ", stripePublishableKey="
 				+ stripePublishableKey + ", stripeSecretKey=" + stripeSecretKey
 				+ ", stripeUserId=" + stripeUserId + ", scope=" + scope
-				+ ", createAccountResponse=" + createAccountResponse + "]";
+				+ ", createAccountResponse=" + createAccountResponse
+				+ ", balanceResponse=" + balanceResponse + "]";
 	}
 
 	/* (non-Javadoc)
@@ -230,6 +246,8 @@ public class Stripe {
 				+ ((accessToken == null) ? 0 : accessToken.hashCode());
 		result = prime * result
 				+ ((accountId == null) ? 0 : accountId.hashCode());
+		result = prime * result
+				+ ((balanceResponse == null) ? 0 : balanceResponse.hashCode());
 		result = prime * result + ((country == null) ? 0 : country.hashCode());
 		result = prime
 				* result
@@ -281,6 +299,13 @@ public class Stripe {
 				return false;
 			}
 		} else if (!accountId.equals(other.accountId)) {
+			return false;
+		}
+		if (balanceResponse == null) {
+			if (other.balanceResponse != null) {
+				return false;
+			}
+		} else if (!balanceResponse.equals(other.balanceResponse)) {
 			return false;
 		}
 		if (country == null) {

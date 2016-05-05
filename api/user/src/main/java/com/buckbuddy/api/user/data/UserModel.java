@@ -137,4 +137,7 @@ public interface UserModel {
 	
 	public Boolean isTransfersEnabled(String userId)
 			throws UserDataException;
+
+	public Map<String, Object> updateUserMapWithBalanceResponse(
+			Map<String, Object> userMap, JsonNode banlanceResponseNode);
 }
