@@ -202,7 +202,7 @@ public class CampaignModelImpl implements CampaignModel {
 				}
 			} else {
 				campaignResponse = rethinkDB.table("campaign").get(campaignId)
-						.pluck("campaignId", "name", "description", "amount", "profilePics", "userId")
+						.pluck("active", "campaignId", "name", "description", "amount", "profilePics", "userId")
 						.run(conn);
 			}
 			return mapper.convertValue(campaignResponse, Campaign.class);
@@ -224,7 +224,7 @@ public class CampaignModelImpl implements CampaignModel {
 			} else {
 				cursor = rethinkDB.table("campaign")
 						.filter(rethinkDB.hashMap("userId", userId))
-						.pluck("campaignId", "name", "description", "amount", "profilePics", "userId")
+						.pluck("active", "campaignId", "name", "description", "amount", "profilePics", "userId")
 						.run(conn);
 			}
 
@@ -271,7 +271,7 @@ public class CampaignModelImpl implements CampaignModel {
 				cursor = rethinkDB
 						.table("campaign")
 						.filter(rethinkDB.hashMap("campaignSlug", campaignSlug))
-						.pluck("campaignId", "name", "description", "amount",
+						.pluck("active", "campaignId", "name", "description", "amount",
 								"collectedAmount", "contributorsCount",
 								"profilePics", "userId").run(conn);
 			}
