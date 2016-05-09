@@ -17,4 +17,6 @@ public interface DonationModel {
 	public Long countByCampaignSlug(String campaignSlug)
 			throws DonationDataException;
 
+	public Donation getById(String donationId) throws DonationDataException;
+
 }

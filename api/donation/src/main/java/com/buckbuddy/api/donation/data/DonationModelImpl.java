@@ -119,6 +119,25 @@ public class DonationModelImpl implements DonationModel {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.buckbuddy.api.user.data.UserModel#getById(java.lang.String,
+	 * java.lang.Boolean)
+	 */
+	@Override
+	public Donation getById(String donationId) throws DonationDataException {
+		Map<String, Object> donationResponse;
+		try {
+			donationResponse = rethinkDB.table("donation").get(donationId)
+					.run(conn);
+			return mapper.convertValue(donationResponse, Donation.class);
+		} catch (Exception e) {
+			LOG.error(DonationDataException.DB_EXCEPTION, e);
+			throw new DonationDataException(DonationDataException.DB_EXCEPTION);
+		}
+	}
+
 	/**
 	 * @param args
 	 */

@@ -4,6 +4,7 @@ import static spark.Spark.get;
 import static spark.Spark.post;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,9 @@ import com.buckbuddy.api.donation.data.model.Donation;
 import com.buckbuddy.core.BuckBuddyResponse;
 import com.buckbuddy.core.exceptions.BuckBuddyException;
 import com.buckbuddy.core.payment.StripeUtil;
+import com.buckbuddy.core.utils.AWSSESUtil;
 import com.buckbuddy.core.utils.RESTClientUtil;
+import com.buckbuddy.core.utils.TemplateUtil;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,6 +42,9 @@ public class DonationRouter {
 	/** The Constant mapper. */
 	private static final ObjectMapper mapper = new ObjectMapper()
 			.registerModule(new JavaTimeModule());
+	private static final String EMAIL_THANK_YOU_TEMPLATE = "emails/thankyou.mustache";
+	private static final String FROM = "hi@buckbuddy.com";
+	private static final String SUBJECT = "Thank you for Bucking!";
 
 	/** The donation model impl. */
 	private DonationModel donationModelImpl;
@@ -314,6 +320,83 @@ public class DonationRouter {
 						responseNode.put("donations", donationNodeArray);
 						responseNode.put("count", count);
 						return responseNode;
+					} catch (DonationDataException ude) {
+						res.status(500);
+						res.type("application/json");
+						buckbuddyResponse.setError(mapper.createObjectNode()
+								.put("message", BuckBuddyException.UNKNOWN));
+						return mapper.writeValueAsString(buckbuddyResponse);
+					}
+				});
+		post("/donations/:donationId/thankYou",
+				(req, res) -> {
+					BuckBuddyResponse buckbuddyResponse = new BuckBuddyResponse();
+					try {
+
+						if (req.params(":donationId") == null
+								|| req.params(":donationId").isEmpty()) {
+							res.status(400);
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"donationId in path param is mandatory"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						String donationId = req.params(":donationId");
+						// get donation record
+						Donation donation = donationModelImpl
+								.getById(donationId);
+						if (donation == null) {
+							res.status(404);
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put("message",
+											"donationId not found"));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						// send email registration to activate
+						Map<String, String> model = new HashMap();
+						model.put(
+								"username",
+								donation.getDonorName() != null
+										&& !donation.getDonorName().isEmpty() ? donation
+										.getDonorName() : "Donor");
+						model.put(
+								"amount",
+								donation.getAmountInCents()
+										.divide(new BigDecimal(100))
+										.toPlainString());
+						String renderedTemplate = TemplateUtil.render(model,
+								EMAIL_THANK_YOU_TEMPLATE);
+						if (donation.getEmail() == null
+								|| donation.getEmail().isEmpty()) {
+							res.status(400);
+							buckbuddyResponse.setError(mapper
+									.createObjectNode().put(
+											"message",
+											"No Email found for doantionId:"
+													+ donationId));
+							res.type("application/json");
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						boolean emailSent = AWSSESUtil.sendMail(FROM,
+								donation.getEmail(), SUBJECT, renderedTemplate);
+						if (!emailSent) {
+							LOG.error("Could not send Thank You email to donor");
+							res.status(500);
+							res.type("application/json");
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"Could not send Thank You email to donor"));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						res.status(204);
+						res.type("application/json");
+						return mapper.writeValueAsString(buckbuddyResponse);
 					} catch (DonationDataException ude) {
 						res.status(500);
 						res.type("application/json");
