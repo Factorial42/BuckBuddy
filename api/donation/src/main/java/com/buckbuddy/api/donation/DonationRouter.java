@@ -119,11 +119,29 @@ public class DonationRouter {
 				JsonNode userJson = RESTClientUtil.sendGET(
 						USER_SERVICE_BASE_GET_USER.replace(":userSlug",
 								donation.getUserSlug()), null);
-				if (userJson != null) {
+				if (userJson != null && !userJson.get("userId").isMissingNode()) {
 					LOG.debug(
 							"Found user with Slug:{}",
 							userJson.get("userSlug") != null ? userJson.get(
 									"userSlug").textValue() : "");
+					donation.setUserId(userJson.get("userId").asText());
+					donation.setUserName(userJson.get("name") != null
+							&& !userJson.get("name").isMissingNode()
+							&& !userJson.get("name").asText().isEmpty() ? userJson
+							.get("name").asText()
+							: userJson.get("firstName") != null
+									&& !userJson.get("firstName")
+											.isMissingNode()
+									&& !userJson.get("firstName").asText()
+											.isEmpty()
+									&& userJson.get("lastName") != null
+									&& !userJson.get("lastName")
+											.isMissingNode()
+									&& !userJson.get("lastName").asText()
+											.isEmpty() ? userJson.get(
+									"firstName").asText()
+									+ " " + userJson.get("lastName").asText()
+									: "");
 				} else {
 					res.status(401);
 					buckbuddyResponse
@@ -140,11 +158,16 @@ public class DonationRouter {
 						CAMPAIGN_SERVICE_BASE_GET_CAMPAIGN.replace(
 								":campaignSlug", donation.getCampaignSlug()),
 						null);
-				if (campaignJson != null) {
+				if (campaignJson != null
+						&& campaignJson.get("campaignId") != null
+						&& !campaignJson.get("campaignId").isMissingNode()) {
 					LOG.debug(
 							"Found campaign with slug:{}",
 							campaignJson.get("campaignSlug") != null ? campaignJson
 									.get("campaignSlug").textValue() : "");
+					donation.setCampaignId(campaignJson.get("campaignId")
+							.asText());
+					donation.setCampaignName(campaignJson.get("name").asText());
 				} else {
 					res.status(401);
 					buckbuddyResponse
@@ -359,10 +382,15 @@ public class DonationRouter {
 						// send email registration to activate
 						Map<String, String> model = new HashMap();
 						model.put(
-								"username",
+								"donorname",
 								donation.getDonorName() != null
 										&& !donation.getDonorName().isEmpty() ? donation
 										.getDonorName() : "Donor");
+						model.put(
+								"username",
+								donation.getUserName() != null
+										&& !donation.getUserName().isEmpty() ? donation
+										.getUserName() : "Campaign Owner");
 						model.put(
 								"amount",
 								donation.getAmountInCents()
@@ -370,8 +398,8 @@ public class DonationRouter {
 										.toPlainString());
 						String renderedTemplate = TemplateUtil.render(model,
 								EMAIL_THANK_YOU_TEMPLATE);
-						if (donation.getEmail() == null
-								|| donation.getEmail().isEmpty()) {
+						if (donation.getThankable() == null
+								|| !donation.getThankable()) {
 							res.status(400);
 							buckbuddyResponse.setError(mapper
 									.createObjectNode().put(
@@ -383,6 +411,7 @@ public class DonationRouter {
 						}
 						boolean emailSent = AWSSESUtil.sendMail(FROM,
 								donation.getEmail(), SUBJECT, renderedTemplate);
+						
 						if (!emailSent) {
 							LOG.error("Could not send Thank You email to donor");
 							res.status(500);
@@ -394,9 +423,29 @@ public class DonationRouter {
 													"Could not send Thank You email to donor"));
 							return mapper.writeValueAsString(buckbuddyResponse);
 						}
-						res.status(204);
+
+						// update donation record with thanked status
+						Map<String, Object> donationMap = new HashMap<>();
+						donationMap.put("donationId", donationId);
+						donationMap.put("thanked", Boolean.TRUE);
+						Map<String, Object> response = donationModelImpl
+								.updatePartial(donationMap);
+
+						if (response != null
+								&& response.get("errors") instanceof Long
+								&& ((Long) response.get("errors")) > 0) {
+							res.status(500);
+							res.type("application/json");
+							buckbuddyResponse
+									.setError(mapper
+											.createObjectNode()
+											.put("message",
+													"Email sent but could not update Donation record."));
+							return mapper.writeValueAsString(buckbuddyResponse);
+						}
+						res.status(200);
 						res.type("application/json");
-						return mapper.writeValueAsString(buckbuddyResponse);
+						return mapper.writeValueAsString(donationMap);
 					} catch (DonationDataException ude) {
 						res.status(500);
 						res.type("application/json");

@@ -19,4 +19,7 @@ public interface DonationModel {
 
 	public Donation getById(String donationId) throws DonationDataException;
 
+	Map<String, Object> updatePartial(Map<String, Object> donationMap)
+			throws DonationDataException;
+
 }

@@ -54,6 +54,12 @@ public class DonationModelImpl implements DonationModel {
 		donationMap.put("donationId", rethinkDB.uuid().run(conn));
 		donationMap.put("createdAt", OffsetDateTime.now());
 		donationMap.put("lastUpdatedAt", donationMap.get("createdAt"));
+		if(donationMap.get("email")==null || donationMap.get("email").toString().isEmpty()) {
+			donationMap.put("thankable", Boolean.FALSE);
+		} else {
+			donationMap.put("thankable", Boolean.TRUE);
+		}
+		donationMap.put("thanked", Boolean.FALSE);
 
 		Map<String, Object> donationResponse;
 
@@ -67,6 +73,25 @@ public class DonationModelImpl implements DonationModel {
 				LOG.debug("Successfully created donation record with id {}",
 						donationResponse.get("donationId"));
 			}
+			return donationResponse;
+		} catch (Exception e) {
+			LOG.error(DonationDataException.DB_EXCEPTION, e);
+			throw new DonationDataException(DonationDataException.DB_EXCEPTION);
+		}
+	}
+
+	@Override
+	public Map<String, Object> updatePartial(Map<String, Object> donationMap)
+			throws DonationDataException {
+
+		// add validation
+		donationMap.put("lastUpdatedAt", OffsetDateTime.now());
+
+		Map<String, Object> donationResponse;
+		try {
+			donationResponse = rethinkDB.table("donation")
+					.get(donationMap.get("donationId"))
+					.update(rethinkDB.expr(donationMap)).run(conn);
 			return donationResponse;
 		} catch (Exception e) {
 			LOG.error(DonationDataException.DB_EXCEPTION, e);
