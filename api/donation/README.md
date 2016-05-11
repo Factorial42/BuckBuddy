@@ -2,9 +2,9 @@
 
 ## create donation
 Req:
-curl -i -XPOST 'localhost:4569/donations' -d '{"campaignUserSlug":"test-user-1461137856", "campaignSlug":"testcampaign-1461734320", "amountInCents":100, "paymentToken":"tok_184yPYHngV6Dzl2IwVR7ng1w","currencyString":"usd", "firstName":"testuser1", "email":"abc@def.com"}'
+curl -i -XPOST 'localhost:4569/donations<<Optional:?token=token>>' -d '{"campaignUserSlug":"test-user-1461137856", "campaignSlug":"testcampaign-1461734320", "amountInCents":100, "paymentToken":"tok_184yPYHngV6Dzl2IwVR7ng1w","currencyString":"usd", "firstName":"testuser1", "email":"abc@def.com"}'
 
-NOTE: If donor is a logged in user "donorUserToken":"token" can be passed to auto-fill email of donor
+NOTE: If donor is a logged in user "?token=token" queryparam passed will auto-fill email of donor
 
 Res:
 HTTP/1.1 200 OK

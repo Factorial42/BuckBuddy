@@ -182,8 +182,9 @@ public class DonationRouter {
 
 				// get user details if donor is a logged in user in the system
 				JsonNode donorUserJson=null;
-				if(donation.getDonorUserToken()!=null && !donation.getDonorUserToken().isEmpty()) {
-
+				String token = req.queryParams("token");
+				if(token!=null && !token.isEmpty()) {
+					donation.setDonorUserToken(token);
 					donorUserJson = RESTClientUtil.sendGET(
 							USER_SERVICE_GET_USER_BY_TOKEN.replace(":token",
 									donation.getDonorUserToken()), null);
