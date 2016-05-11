@@ -24,15 +24,18 @@ public class Donation {
 	private String paymentToken; // token generated in front end by Stripe util
 	private String affiliateId;
 	
-	// if donor is a buck buddy user
-	private String userId;
-	private String userSlug;
-	private String userName;
+	// campaignUser
+	private String campaignUserId;
+	private String campaignUserSlug;
+	private String campaignUserName;
 	private String campaignId;
 	private String campaignSlug;
 	private String campaignName;
 
 	private String donorName;
+	private String donorUserToken;
+	private String donorUserId;
+	private String donorUserSlug;
 	private String firstName;
 	private String middleName;
 	private String lastName;
@@ -171,6 +174,18 @@ public class Donation {
 		this.donorName = donorName;
 	}
 	/**
+	 * @return the donorUserToken
+	 */
+	public String getDonorUserToken() {
+		return donorUserToken;
+	}
+	/**
+	 * @param donorUserToken the donorUserToken to set
+	 */
+	public void setDonorUserToken(String donorUserToken) {
+		this.donorUserToken = donorUserToken;
+	}
+	/**
 	 * @return the affiliateId
 	 */
 	public String getAffiliateId() {
@@ -181,43 +196,6 @@ public class Donation {
 	 */
 	public void setAffiliateId(String affiliateId) {
 		this.affiliateId = affiliateId;
-	}
-	/**
-	 * @return the userId
-	 */
-	public String getUserId() {
-		return userId;
-	}
-	/**
-	 * @param userId the userId to set
-	 */
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-	
-	/**
-	 * @return the userSlug
-	 */
-	public String getUserSlug() {
-		return userSlug;
-	}
-	/**
-	 * @param userSlug the userSlug to set
-	 */
-	public void setUserSlug(String userSlug) {
-		this.userSlug = userSlug;
-	}
-	/**
-	 * @return the userName
-	 */
-	public String getUserName() {
-		return userName;
-	}
-	/**
-	 * @param userName the userName to set
-	 */
-	public void setUserName(String userName) {
-		this.userName = userName;
 	}
 	/**
 	 * @return the campaignName
@@ -254,6 +232,66 @@ public class Donation {
 	 */
 	public void setName(String name) {
 		this.donorName = name;
+	}
+	/**
+	 * @return the campaignUserId
+	 */
+	public String getCampaignUserId() {
+		return campaignUserId;
+	}
+	/**
+	 * @param campaignUserId the campaignUserId to set
+	 */
+	public void setCampaignUserId(String campaignUserId) {
+		this.campaignUserId = campaignUserId;
+	}
+	/**
+	 * @return the campaignUserSlug
+	 */
+	public String getCampaignUserSlug() {
+		return campaignUserSlug;
+	}
+	/**
+	 * @param campaignUserSlug the campaignUserSlug to set
+	 */
+	public void setCampaignUserSlug(String campaignUserSlug) {
+		this.campaignUserSlug = campaignUserSlug;
+	}
+	/**
+	 * @return the campaignUserName
+	 */
+	public String getCampaignUserName() {
+		return campaignUserName;
+	}
+	/**
+	 * @param campaignUserName the campaignUserName to set
+	 */
+	public void setCampaignUserName(String campaignUserName) {
+		this.campaignUserName = campaignUserName;
+	}
+	/**
+	 * @return the donorUserId
+	 */
+	public String getDonorUserId() {
+		return donorUserId;
+	}
+	/**
+	 * @param donorUserId the donorUserId to set
+	 */
+	public void setDonorUserId(String donorUserId) {
+		this.donorUserId = donorUserId;
+	}
+	/**
+	 * @return the donorUserSlug
+	 */
+	public String getDonorUserSlug() {
+		return donorUserSlug;
+	}
+	/**
+	 * @param donorUserSlug the donorUserSlug to set
+	 */
+	public void setDonorUserSlug(String donorUserSlug) {
+		this.donorUserSlug = donorUserSlug;
 	}
 	/**
 	 * @return the firstName
@@ -450,18 +488,21 @@ public class Donation {
 				+ ", currencyString=" + currencyString
 				+ ", applicationFeeCollected=" + applicationFeeCollected
 				+ ", paymentToken=" + paymentToken + ", affiliateId="
-				+ affiliateId + ", userId=" + userId + ", userSlug=" + userSlug
-				+ ", userName=" + userName + ", campaignId=" + campaignId
-				+ ", campaignSlug=" + campaignSlug + ", campaignName="
-				+ campaignName + ", donorName=" + donorName + ", firstName="
-				+ firstName + ", middleName=" + middleName + ", lastName="
-				+ lastName + ", email=" + email + ", description="
-				+ description + ", country=" + country + ", facebookHandle="
-				+ facebookHandle + ", twitterHandle=" + twitterHandle
-				+ ", whatsappHandle=" + whatsappHandle + ", smsHandle="
-				+ smsHandle + ", chargeUserResponse=" + chargeUserResponse
-				+ ", donorProfilePic=" + donorProfilePic + ", thankable="
-				+ thankable + ", thanked=" + thanked + "]";
+				+ affiliateId + ", campaignUserId=" + campaignUserId
+				+ ", campaignUserSlug=" + campaignUserSlug
+				+ ", campaignUserName=" + campaignUserName + ", campaignId="
+				+ campaignId + ", campaignSlug=" + campaignSlug
+				+ ", campaignName=" + campaignName + ", donorName=" + donorName
+				+ ", donorUserToken=" + donorUserToken + ", donorUserId="
+				+ donorUserId + ", donorUserSlug=" + donorUserSlug
+				+ ", firstName=" + firstName + ", middleName=" + middleName
+				+ ", lastName=" + lastName + ", email=" + email
+				+ ", description=" + description + ", country=" + country
+				+ ", facebookHandle=" + facebookHandle + ", twitterHandle="
+				+ twitterHandle + ", whatsappHandle=" + whatsappHandle
+				+ ", smsHandle=" + smsHandle + ", chargeUserResponse="
+				+ chargeUserResponse + ", donorProfilePic=" + donorProfilePic
+				+ ", thankable=" + thankable + ", thanked=" + thanked + "]";
 	}
 	
 	/* (non-Javadoc)
@@ -485,6 +526,14 @@ public class Donation {
 				+ ((campaignName == null) ? 0 : campaignName.hashCode());
 		result = prime * result
 				+ ((campaignSlug == null) ? 0 : campaignSlug.hashCode());
+		result = prime * result
+				+ ((campaignUserId == null) ? 0 : campaignUserId.hashCode());
+		result = prime
+				* result
+				+ ((campaignUserName == null) ? 0 : campaignUserName.hashCode());
+		result = prime
+				* result
+				+ ((campaignUserSlug == null) ? 0 : campaignUserSlug.hashCode());
 		result = prime
 				* result
 				+ ((chargeUserResponse == null) ? 0 : chargeUserResponse
@@ -504,6 +553,12 @@ public class Donation {
 				+ ((donorName == null) ? 0 : donorName.hashCode());
 		result = prime * result
 				+ ((donorProfilePic == null) ? 0 : donorProfilePic.hashCode());
+		result = prime * result
+				+ ((donorUserId == null) ? 0 : donorUserId.hashCode());
+		result = prime * result
+				+ ((donorUserSlug == null) ? 0 : donorUserSlug.hashCode());
+		result = prime * result
+				+ ((donorUserToken == null) ? 0 : donorUserToken.hashCode());
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
 		result = prime * result
 				+ ((facebookHandle == null) ? 0 : facebookHandle.hashCode());
@@ -525,11 +580,6 @@ public class Donation {
 		result = prime * result + ((thanked == null) ? 0 : thanked.hashCode());
 		result = prime * result
 				+ ((twitterHandle == null) ? 0 : twitterHandle.hashCode());
-		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
-		result = prime * result
-				+ ((userName == null) ? 0 : userName.hashCode());
-		result = prime * result
-				+ ((userSlug == null) ? 0 : userSlug.hashCode());
 		result = prime * result
 				+ ((whatsappHandle == null) ? 0 : whatsappHandle.hashCode());
 		return result;
@@ -593,6 +643,27 @@ public class Donation {
 		} else if (!campaignSlug.equals(other.campaignSlug)) {
 			return false;
 		}
+		if (campaignUserId == null) {
+			if (other.campaignUserId != null) {
+				return false;
+			}
+		} else if (!campaignUserId.equals(other.campaignUserId)) {
+			return false;
+		}
+		if (campaignUserName == null) {
+			if (other.campaignUserName != null) {
+				return false;
+			}
+		} else if (!campaignUserName.equals(other.campaignUserName)) {
+			return false;
+		}
+		if (campaignUserSlug == null) {
+			if (other.campaignUserSlug != null) {
+				return false;
+			}
+		} else if (!campaignUserSlug.equals(other.campaignUserSlug)) {
+			return false;
+		}
 		if (chargeUserResponse == null) {
 			if (other.chargeUserResponse != null) {
 				return false;
@@ -654,6 +725,27 @@ public class Donation {
 				return false;
 			}
 		} else if (!donorProfilePic.equals(other.donorProfilePic)) {
+			return false;
+		}
+		if (donorUserId == null) {
+			if (other.donorUserId != null) {
+				return false;
+			}
+		} else if (!donorUserId.equals(other.donorUserId)) {
+			return false;
+		}
+		if (donorUserSlug == null) {
+			if (other.donorUserSlug != null) {
+				return false;
+			}
+		} else if (!donorUserSlug.equals(other.donorUserSlug)) {
+			return false;
+		}
+		if (donorUserToken == null) {
+			if (other.donorUserToken != null) {
+				return false;
+			}
+		} else if (!donorUserToken.equals(other.donorUserToken)) {
 			return false;
 		}
 		if (email == null) {
@@ -738,27 +830,6 @@ public class Donation {
 				return false;
 			}
 		} else if (!twitterHandle.equals(other.twitterHandle)) {
-			return false;
-		}
-		if (userId == null) {
-			if (other.userId != null) {
-				return false;
-			}
-		} else if (!userId.equals(other.userId)) {
-			return false;
-		}
-		if (userName == null) {
-			if (other.userName != null) {
-				return false;
-			}
-		} else if (!userName.equals(other.userName)) {
-			return false;
-		}
-		if (userSlug == null) {
-			if (other.userSlug != null) {
-				return false;
-			}
-		} else if (!userSlug.equals(other.userSlug)) {
 			return false;
 		}
 		if (whatsappHandle == null) {

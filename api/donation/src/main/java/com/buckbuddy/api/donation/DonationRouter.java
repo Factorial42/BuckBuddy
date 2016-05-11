@@ -36,6 +36,7 @@ public class DonationRouter {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DonationRouter.class);
 	private static final String USER_SERVICE_BASE_GET_USER = "http://localhost:4567/users/bySlug/:userSlug";
+	private static final String USER_SERVICE_GET_USER_BY_TOKEN = "http://localhost:4567/users/byToken/:token";
 	private static final String CAMPAIGN_SERVICE_BASE_GET_CAMPAIGN = "http://localhost:4568/campaigns/bySlug/:campaignSlug/minified";
 	private static final String CAMPAIGN_SERVICE_BASE_UPDATE_CONTRIBUTIONS = "http://localhost:4568/campaigns/bySlug/:campaignSlug/updateContributions?donationAmount=";
 
@@ -74,8 +75,8 @@ public class DonationRouter {
 				}
 				// check for user slug and campaign slug - mandatory
 				// fields
-				if (donation.getUserSlug() == null
-						|| donation.getUserSlug().isEmpty()
+				if (donation.getCampaignUserSlug() == null
+						|| donation.getCampaignUserSlug().isEmpty()
 						|| donation.getCampaignSlug() == null
 						|| donation.getCampaignSlug().isEmpty()) {
 					res.status(400);
@@ -118,14 +119,14 @@ public class DonationRouter {
 				// Verify user exists.
 				JsonNode userJson = RESTClientUtil.sendGET(
 						USER_SERVICE_BASE_GET_USER.replace(":userSlug",
-								donation.getUserSlug()), null);
+								donation.getCampaignUserSlug()), null);
 				if (userJson != null && !userJson.get("userId").isMissingNode()) {
 					LOG.debug(
 							"Found user with Slug:{}",
 							userJson.get("userSlug") != null ? userJson.get(
 									"userSlug").textValue() : "");
-					donation.setUserId(userJson.get("userId").asText());
-					donation.setUserName(userJson.get("name") != null
+					donation.setCampaignUserId(userJson.get("userId").asText());
+					donation.setCampaignUserName(userJson.get("name") != null
 							&& !userJson.get("name").isMissingNode()
 							&& !userJson.get("name").asText().isEmpty() ? userJson
 							.get("name").asText()
@@ -179,6 +180,28 @@ public class DonationRouter {
 					return mapper.writeValueAsString(buckbuddyResponse);
 				}
 
+				// get user details if donor is a logged in user in the system
+				JsonNode donorUserJson=null;
+				if(donation.getDonorUserToken()!=null && !donation.getDonorUserToken().isEmpty()) {
+
+					donorUserJson = RESTClientUtil.sendGET(
+							USER_SERVICE_GET_USER_BY_TOKEN.replace(":token",
+									donation.getDonorUserToken()), null);
+					if (donorUserJson != null
+							&& donorUserJson.get("data") != null
+							&& !donorUserJson.get("data").isMissingNode()
+							&& !donorUserJson.get("data").get("userId")
+									.isMissingNode()) {
+						donation.setDonorUserId(donorUserJson.get("data")
+								.get("userId").asText());
+						donation.setDonorUserSlug(donorUserJson.get("data")
+								.get("userSlug").asText());
+						donation.setEmail(donorUserJson.get("data")
+								.get("email") != null ? donorUserJson
+								.get("data").get("email").asText() : "");
+					}
+				}
+				
 				// call stripe charge api
 				if (!userJson.findPath("paymentProfiles").isMissingNode()
 						&& !userJson.findPath("paymentProfiles")
@@ -265,7 +288,7 @@ public class DonationRouter {
 					buckbuddyResponse.setError(mapper.createObjectNode().put(
 							"message",
 							"No stripe account found for Campaign Owner with user slug:"
-									+ donation.getUserSlug()));
+									+ donation.getCampaignUserSlug()));
 					return mapper.writeValueAsString(buckbuddyResponse);
 				}
 			} catch (DonationDataException ude) {
@@ -388,9 +411,9 @@ public class DonationRouter {
 										.getDonorName() : "Donor");
 						model.put(
 								"username",
-								donation.getUserName() != null
-										&& !donation.getUserName().isEmpty() ? donation
-										.getUserName() : "Campaign Owner");
+								donation.getCampaignUserName() != null
+										&& !donation.getCampaignUserName().isEmpty() ? donation
+										.getCampaignUserName() : "Campaign Owner");
 						model.put(
 								"amount",
 								donation.getAmountInCents()
