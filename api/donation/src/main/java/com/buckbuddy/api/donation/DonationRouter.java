@@ -82,7 +82,7 @@ public class DonationRouter {
 					res.status(400);
 					buckbuddyResponse
 							.setError(mapper.createObjectNode().put("message",
-									"userSlug & campaignSlug are mandatory"));
+									"campaignUserSlug & campaignSlug are mandatory"));
 					res.type("application/json");
 					return mapper.writeValueAsString(buckbuddyResponse);
 				}
